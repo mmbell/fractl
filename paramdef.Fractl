@@ -1,0 +1,300 @@
+/*********************************************************
+ * parameter definitions for Fractl
+ *
+ * Bruno Melli, CSU
+ *
+ * Dec 2017
+ */
+
+//////////////////////////////////////////////////////////
+
+commentdef {
+   p_header = "Fractl calculates U, V, and W wind components from 2 or more doplers, and writes a NetCdf file with the results";
+}
+
+commentdef {
+   p_header = "DEBUGGING";
+}
+
+typedef enum {
+  DEBUG_OFF, DEBUG_NORM, DEBUG_VERBOSE, DEBUG_EXTRA
+} debug_t;
+
+paramdef enum debug_t {
+  p_default = DEBUG_OFF;
+  p_descr = "Debug option";
+  p_help = "If set, debug messages will be printed appropriately";
+} debug;
+
+paramdef string {
+   p_desc = "z,y,x,radius. specifies a region for detailed logging";
+   p_help = "detail spec used for debugging only.\nExample: \"5,20,30,0.1\"";
+} detailSpec;
+
+commentdef {
+   p_header = "MINIMUM VALUES";
+}
+
+paramdef double {
+   p_default = -20;
+   p_descr = "Minimum dbz value for valid data";
+   p_help = "Any value below that will be tossed out.\nExample: -20";
+} minDbz;
+
+paramdef double {
+   p_default = 0.3;
+   p_descr = "Minimum dbz value for valid data";
+   p_help = "Any value below that will be tossed out.\nExample: 0.3";
+} minNcp;
+
+commentdef {
+   p_header = "TEST MODE";
+}
+
+typedef enum {
+  MODE_NONE, MODE_ALPHA, MODE_BETA, MODE_ZETA, MODE_ZETA_BELTRAMI
+} testmode_t;
+
+paramdef enum testmode_t {
+   p_default = MODE_ZETA;
+   p_descr = "Test mode";
+   p_help =
+   "     MODE_ALPHA:\n"
+   "       Use simple synthetic wind data.\n"
+   "       Skip the redar files.\n"
+   "       Must specify synWinds: W,V,U\n"
+   "       Obs are located at the verif cell centers.\n\n"
+   "     MODE_BETA:\n"
+   "       Use simple synthetic wind data.\n"
+   "       Read swp files and use swp obs locations,\n"
+   "       but replace radial vel with synthetic.\n"
+   "       Must specify synWinds: W,V,U\n"
+   "       radFiles beg,lim\n"
+   "       Use radar files i: beg <= i < lim.\n"
+   "       If beg == lim == 0, read all files\n\n"
+   "     MODE_ZETA:\n"
+   "       Operational: use specified radar data.\n"
+   "       Specify synWinds: 0,0,0\n"
+   "       radFiles beg,lim\n"
+   "       Use radar files i: beg <= i < lim.\n"
+   "       If beg == lim == 0, read all files\n\n"
+   "     MODE_ZETA_BELTRAMI:\n"
+   "       Like zeta, but compare the results with\n"
+   "       the test Beltrami flow and print statistics.\n"
+   "       Specify synWinds: 0,0,0\n"
+   "       This is only useful for swp files generated\n"
+   "       by Michael Bell's Beltrami flow simulation.\n"
+   ;
+} testMode;
+
+paramdef string {
+  p_desc = "radar file filter: start,limit";
+  p_help = "Use radar files i: start <= i < limit.\nRead all files if start == limit == 0";
+} radFiles;
+  
+commentdef {
+   p_header = "SYN WIND";
+}
+
+paramdef string {
+   p_default = "0,0,0";
+   p_desc = "Wind field for any testMode other than zeta";
+   p_help =
+     "      Specify a comma sep triplet: W,V,U\n"
+     "      If a wind spec is numeric,\n"
+     "        use that constant uniform value.\n"
+     "      Else the wind spec is the name for\n"
+     "        one of SYNFUNC_* values:\n"
+     "        \"sinx\": wind component = sin(locx)\n"
+     "        \"siny\": wind component = sin(locy)\n"
+     "        \"sinz\": wind component = sin(locz)\n"
+     "      Example:\n"
+     "        -synWinds 3,sinx,sinx\n"
+     "        Means uniform Z wind at 3 m/s.\n"
+     "        Both V and U winds = sin(locx),\n"
+     "          so the wind would be from the SW\n"
+     "          to the NW, varying as sin(locx).\n";
+} synWinds;
+
+commentdef {
+   p_header = "GRID SPEC";
+}
+
+paramdef string {
+   p_desc = "Z grid description";
+   p_help = "\"min,max,incr\"\n"
+     "   To get min and max from the data, specify only the increment\n";
+} zGrid;
+
+paramdef string {
+   p_desc = "Y grid description";
+   p_help = "\"min,max,incr\" or \"incr\"";
+} yGrid;
+
+paramdef string {
+   p_desc = "X grid description";
+   p_help = "\"min,max,incr\" or \"incr\"";
+} xGrid;
+
+commentdef {
+   p_header = "PROJECTION";
+};
+
+paramdef string {
+   p_default = "transverseMercator";
+   p_desc = "Projection Name";
+   p_help = "Must be transverseMercador";
+} projName;
+
+paramdef double {
+   p_desc = "projection lat0";
+   p_help = "For example: 16.5";
+} projLat0;
+
+paramdef double {
+   p_desc = "projection lon0";
+   p_help = "For example: 148.0";
+} projLon0;
+
+paramdef double {
+  p_desc = "radar altitude in km relative to sea level";
+  p_help = "only needed for pre gridded mode";
+  p_default = -1.0;
+} radarAlt;
+
+commentdef {
+   p_header = "MISC";
+};
+
+paramdef double {
+   p_desc = "W wind into the base of the lowest level"
+   p_default = 0.0;
+} baseW;
+
+paramdef double {
+   p_desc = "epsilon";
+} epsilon;
+
+commentdef {
+   p_header = "LIMITS";
+};
+
+paramdef double {
+   p_desc = "Max absolute delta altitude of observations";
+   p_help = "in km. Default 0";
+   p_default = 0.0;
+} maxDeltaAltKm;
+
+paramdef double {
+   p_desc = "Max Absolute Elevation";
+   p_help = "in degree";
+   p_default = 0.0;
+} maxAbsElevDeg;
+
+paramdef double {
+   p_desc = "Min radial distance of observation";
+   p_help = "in km";
+   p_default = 0.0;
+} minRadialDistKm;
+
+paramdef int {
+   p_desc = "Max number of nearest neighbors";
+} numNbrMax;
+
+paramdef double {
+   p_desc = "Max Dist Base";
+   p_help = "max pt dist = base + factor * aircraftDist";
+} maxDistBase;
+
+paramdef double {
+   p_desc = "Max Dist Factor";
+   p_help = "max pt dist = base + factor * aircraftDist";
+} maxDistFactor;
+
+commentdef {
+   p_header = "FLAGS";
+};
+
+paramdef string {
+   p_desc = "Force ncp and dbz to be ok on all points";
+   p_help = "y/n";
+   p_default = "y";
+} forceOk;
+
+paramdef string {
+   p_desc = "use Eigen";
+   p_help = "y: use Eigen, n: use Cramer";
+   p_default = "y";
+} useEigen;
+
+paramdef string {
+   p_desc = "pre-gridded";
+   p_help = "Data is pre-gridded";
+   p_default = "n";
+} preGridded;
+
+commentdef {
+   p_header = "FILES AND DIRECTORIES";
+};
+
+paramdef string {
+   p_desc = "Input file directory";
+   p_help = "Any radx supported format, or output of Radx2Grid";
+} inDir;
+
+paramdef string {
+   p_desc = "regex for files in inDir";
+   p_help = "for example '^swp'";
+} fileRegex;
+
+paramdef string {
+   p_desc = "File containing a list of input files";
+   p_help = "One entry per line\n"
+     "fileName altKmMsl latDeg lonDeg\n"
+     "# in the first column is a comment";
+} fileList;
+
+paramdef string {
+   p_desc = "Output text file";
+   p_help = "Has verification of grid results.";
+} outTxt;
+
+paramdef string {
+   p_desc = "Output NetCDF file";
+   p_help = "If outNc ends in a slash we make a subdir and write to yyyymmdd/ncf_yyyymmdd_hhmmss.nc";
+} outNc;
+
+commentdef {
+   p_header = "FIELDS";
+};
+
+paramdef string {
+   p_desc = "Name of the radial wind field";
+   p_help = "VG for Eldora, VE for CSU-CHILL";
+} radialName;
+
+paramdef string {
+   p_desc = "Name of the reflectivity field";
+   p_help = "DBZ for Eldora, DZ for CSU-CHILL";
+} dbzName;
+
+paramdef string {
+   p_desc = "Name of the net coherent power field";
+   p_help = "NCP for Eldora, NC for CSU-CHILL";
+} ncpName;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
