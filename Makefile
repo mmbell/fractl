@@ -4,7 +4,7 @@ CXX_FLAGS = -gdwarf-4 -std=c++11
 TDRP_GEN = /usr/local/lrose/bin/tdrp_gen
 
 GEOGRAPHIC_LIB_DIR = /home/bpmelli/.linuxbrew/Cellar/geographiclib/1.48/lib
-ZIP_LIB_DIR       = /home/bpmelli/.linuxbrew/Cellar/libzip/1.3.0/lib
+ZIP_LIB_DIR        = /home/bpmelli/.linuxbrew/Cellar/libzip/1.3.0/lib
 LROSE_LIB_DIR      = /usr/local/lrose-20170929.x86_64/lib
 
 GEOGRAPHIC_LIB = $(GEOGRAPHIC_LIB_DIR)/libGeographic.so.17.1.1
@@ -33,11 +33,8 @@ Fractl: $(OBJS)
 %.o : %.cc
 	$(CXX) $(CXX_FLAGS) $(INCLUDES) -c $< -o $@
 
-# Fractl.o: Fractl.cc
-# 	$(CXX) $(CXX_FLAGS) -c $(INCLUDES) Fractl.cc
-
+Args.cc: Params.hh
 Params.o: Params.cc
-Params.cc: Params.hh
 
 Params.hh: paramdef.Fractl
 	$(TDRP_GEN) -c++ -f paramdef.Fractl
