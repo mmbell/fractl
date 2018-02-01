@@ -3,7 +3,7 @@
 // ** University Corporation for Atmospheric Research (UCAR)
 // ** National Center for Atmospheric Research (NCAR)
 // ** Colorado State University
-// ** BSD licence applies 
+// ** BSD licence applies
 // ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -18,7 +18,7 @@
 //   testb.gdb     Debug using CSU-Chill data
 //
 //==================================================================
-// 
+//
 // Future to do:
 //
 // Examine: how many neighbors to use?
@@ -66,10 +66,10 @@
 // Use a thread pool of, say, the number of available processors - 1,
 // assuming numProc > 1.
 // In calcAllVU have a separate thread for each z layer.
-// 
+//
 //
 //==================================================================
-// 
+//
 //
 // Some rough file sizes:
 //
@@ -82,26 +82,26 @@
 //   lat, lon, alt, vg, dbz, ncp
 //   about 6 * 4 = 24 bytes
 //   Plus some memory allocation overhead.
-// 
+//
 // So the total memory in this case is about 1.2e10 bytes.
 //
 //
 //==================================================================
-// 
+//
 //
 // Eldora fields:
-//   name: VT   longName: Radial Velocity, Combined              
-//   name: ZZ   longName: Radar Reflectivity Factor, Combined    
-//   name: VV   longName: Radial Velocity, Combined              
-//   name: NCP  longName: Normalized Coherent Power, Combined    
-//   name: SW   longName: Spectral Width, Combined               
-//   name: DBZ  longName: Radar Reflectivity Factor, Combined    
-//   name: VR   longName: Radial Velocity, Combined              
+//   name: VT   longName: Radial Velocity, Combined
+//   name: ZZ   longName: Radar Reflectivity Factor, Combined
+//   name: VV   longName: Radial Velocity, Combined
+//   name: NCP  longName: Normalized Coherent Power, Combined
+//   name: SW   longName: Spectral Width, Combined
+//   name: DBZ  longName: Radar Reflectivity Factor, Combined
+//   name: VR   longName: Radial Velocity, Combined
 //   name: VG   longName: Ground relative velocity
 //   name: GG   longName: Ground Gates
 //   name: SWZ  longName: Ratio
-// 
-// 
+//
+//
 // CSU-Chill fields:
 //   name: DZ  longName: reflectivity
 //   name: VE  longName: radial velocity
@@ -117,7 +117,7 @@
 //   name: XV
 //
 //==================================================================
-// 
+//
 
 
 
@@ -140,6 +140,7 @@
 #include <string>
 #include <cstring>
 #include <vector>
+#include <random>
 
 #include <sys/resource.h>
 #include <sys/stat.h>
@@ -170,7 +171,7 @@ int main( int argc, char * argv[])
   Fractl rwind;
   if ( ! rwind.run(argc, argv) )
     retVal = 1;
-  
+
   return retVal;
 }
 
@@ -217,14 +218,14 @@ Fractl::Fractl()
 {
   verbose = false;
   preGridded = false;
-  
+
   bugs = Params::DEBUG_OFF;
   testMode = Params::MODE_NONE;
   synWinds = NULL;
   radFiles = NULL;
 
   // Init timing
-  
+
   // struct timeval timea;
   if (gettimeofday( &timea, NULL) != 0) throwerr("gettimeofday err");
   printRunTime("start", &timea);
@@ -247,7 +248,7 @@ Fractl::Fractl()
   projLat0 = MISS_PARM;
   projLon0 = MISS_PARM;
   radarAlt = -1;
-  
+
   baseW = MISS_PARM;
   epsilon = MISS_PARM;
   maxDeltaAltKm = MISS_PARM;
@@ -270,9 +271,9 @@ Fractl::Fractl()
   detailSpec = NULL;
 
   cellMat = NULL;
-  
+
   ndim = 3;
-    
+
   long randSeed = 1;
   srandom( randSeed);
 
@@ -283,13 +284,13 @@ Fractl::Fractl()
   flattening = GeographicLib::Constants::WGS84_f<double>();
 
   geodesic = new GeographicLib::Geodesic(earthRadiusMeter, flattening);
-  
+
   pointVec = NULL;
   radarKdTree = NULL;
 
   aircraftBbox = new Bbox();   // overall bounding box of aircraft locs
   pointBbox = new Bbox();      // overall bounding box of point locs
-  
+
   timeMin = numeric_limits<double>::quiet_NaN();
   timeMax = numeric_limits<double>::quiet_NaN();
 
@@ -299,10 +300,10 @@ Fractl::Fractl()
 bool Fractl::run(int argc, char *argv[])
 {
   parseArgs(argc, argv);
-  
+
   // Given projLon0 = 148.0, projLat0 = 16.5,
   // calculate basex = 0, basey = 1.82424e+06 / 1000 = 1842
-  
+
   latLonToYX(
     // tranMerc,          // TransverseMercatorExact
     projLon0,          // central meridian of projection
@@ -328,7 +329,7 @@ bool Fractl::run(int argc, char *argv[])
 
   writeNetcdf();
   freeCellMat();
-  
+
   struct rusage ruse;
   getrusage( RUSAGE_SELF, &ruse);
   cout << setprecision(5);
@@ -856,7 +857,7 @@ void Fractl::latLonToYX(
   double & coordy,        // output coord y, km
   double & coordx)        // output coord x, km
 {
-  tranMerc.Forward(		    
+  tranMerc.Forward(
     projLon0Deg,
     latDeg,
     lonDeg,
@@ -877,7 +878,7 @@ void Fractl::yxToLatLon(
   double & latDeg,        // output latitude
   double & lonDeg)        // output longitude
 {
-  tranMerc.Reverse(		    
+  tranMerc.Reverse(
     projLon0,
     1000 * (basex + coordx),
     1000 * (basey + coordy),
@@ -921,13 +922,16 @@ bool Fractl::testDetail(
 
 long Fractl::getLongRandom(
   long vmin,
-  long vlim,
-  random_data *randInfo)
+  long vlim)
 {
-  int32_t rr = 0;
-  if (0 != random_r( randInfo, &rr)) throwerr("random_r error");
-  double frac = rr / (((double) RAND_MAX) + 1);
-  long res = vmin + (long) (frac * (vlim - vmin));
+//  int32_t rr = 0;
+//  if (0 != random_r( randInfo, &rr)) throwerr("random_r error");
+  std::random_device r;
+  std::default_random_engine e1(r());
+  std::uniform_int_distribution<int> uniform_dist(vmin, vlim);
+  long res = uniform_dist(e1);
+//  double frac = rr / (((double) RAND_MAX) + 1);0
+//  long res = vmin + (long) (frac * (vlim - vmin));
   if (res < 0 || res >= vlim) throwerr("invalid getRandLong res");
   return res;
 }
@@ -1177,7 +1181,7 @@ bool Fractl::checkArgs()
 
   if (projName != "transverseMercator") badparms("unknown projName");
   printRunTime("init", &timea);
-  
+
   return true;
 }
 
@@ -1186,12 +1190,12 @@ bool Fractl::checkArgs()
 bool Fractl::loadObservations()
 {
   bool retVal;
-  
+
   if (testMode == Params::MODE_ALPHA)
     retVal = fillWithSyntheticWinds();
   else
     retVal = fillWithObservations();
-  
+
   if(verbose) {
     cout << "cntTimeh: " << cntTimeh << "  sumTimeh: " << sumTimeh << endl;
     cout << "cntTimei: " << cntTimei << "  sumTimei: " << sumTimei << endl;
@@ -1317,7 +1321,7 @@ bool Fractl::fillWithObservations()
   cout << endl << "fsubsetList:" << endl;
 
   // Get a list of files to load
-  
+
   vector<FileSpec *>* fsubsetList = new vector<FileSpec *>();
   for (long ifile = 0; ifile < fspecList->size(); ifile++) {
     FileSpec * fspec = fspecList->at( ifile);
@@ -1325,7 +1329,7 @@ bool Fractl::fillWithObservations()
         || ifile >= radFiles[0] && ifile < radFiles[1])
       {
         fsubsetList->push_back( fspec);
-	if (bugs >= Params::DEBUG_VERBOSE) 
+	if (bugs >= Params::DEBUG_VERBOSE)
 	  cout << "  fsubsetList: ifile: " << ifile
 	       << "  fspec: " << fspec->fpath << endl;
       }
@@ -1344,13 +1348,13 @@ bool Fractl::fillWithObservations()
   Statistic statVg;
   Statistic statDbz;
   Statistic statNcp;
-  
+
   for (long ifile = 0; ifile < fsubsetList->size(); ifile++) {
     FileSpec * fspec = fsubsetList->at( ifile);
     cout << "main: start fpath: " << fspec->fpath << endl;
 
     bool fOk = true;
-    
+
     if (preGridded)
       fOk = readPreGriddedFile(
 		  ifile,
@@ -1428,9 +1432,9 @@ bool Fractl::buildKdTree()
   // Build the KD tree for 3D radar observations
   long npt = pointVec->size();
   cout << "npt: " << npt << endl;
-  
+
   KD_real **radarKdMat = new KD_real*[npt];     // npt x ndim
-  
+
   for (long ii = 0; ii < npt; ii++) {
     radarKdMat[ii] = new KD_real[ndim];
     Point * pt = pointVec->at(ii);
@@ -1442,7 +1446,7 @@ bool Fractl::buildKdTree()
     }
   }
   printRunTime("build KD mat", &timea);
-  
+
   radarKdTree = new KD_tree(
     (const KD_real **) radarKdMat,
     npt,
@@ -1471,7 +1475,7 @@ bool Fractl::findLimits()
       xgridmax = xgridinc * ceil( pointBbox->coordxMax / xgridinc);
     }
   } // if pointBbox != NULL
-  
+
   if (zgridmin == MISS_PARM) badparms("parm not specified: -zgrid");
   if (ygridmin == MISS_PARM) badparms("parm not specified: -ygrid");
   if (xgridmin == MISS_PARM) badparms("parm not specified: -xgrid");
@@ -1480,11 +1484,11 @@ bool Fractl::findLimits()
   nradz = lround( (zgridmax - zgridmin) / zgridinc) + 1;
   nrady = lround( (ygridmax - ygridmin) / ygridinc) + 1;
   nradx = lround( (xgridmax - xgridmin) / xgridinc) + 1;
-  
+
   checkGrid( "radz", nradz, zgridmin, zgridmax, zgridinc);
   checkGrid( "rady", nrady, ygridmin, ygridmax, ygridinc);
   checkGrid( "radx", nradx, xgridmin, xgridmax, xgridinc);
-  
+
   cout << setprecision(5);
   cout << "main:" << endl;
   cout << "radz: nradz: " << nradz
@@ -1538,4 +1542,3 @@ void Fractl::freeCellMat()
   delete[] cellMat;
   cellMat = NULL;
 }
-

@@ -3,7 +3,7 @@
 // ** University Corporation for Atmospheric Research (UCAR)
 // ** National Center for Atmospheric Research (NCAR)
 // ** Colorado State University
-// ** BSD licence applies 
+// ** BSD licence applies
 // ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -56,7 +56,7 @@ extern double sumTimen;
 using namespace std;
 
 class Fractl {
-  
+
 public:
 
   static const int HANDLE_BBOX      = 1;
@@ -82,16 +82,16 @@ public:
   ~Fractl();
 
   bool run(int argc, char *argv[]);
-  
+
   bool parseArgs(int argc, char *argv[]);
   bool parseFile(const char *fileName, int &argc, char ***argv);
 
-  // TODO Make these private 
+  // TODO Make these private
   bool parseSynWinds(char *param, double *synWinds);
   bool parseRadFiles(char *param, long *radFiles);
   bool parseGridSpec(char *param, double &min, double &max, double &step);
   bool parseDetailSpec(char *param, double *spec);
-  
+
   bool checkArgs();
   void dumpArgs();
 
@@ -113,7 +113,7 @@ public:
 		     double &timeMin,                  // returned
                      double &timeMax);
 
-  
+
   void readRadarFile(
 		     long forceOk,        // if != 0, force all point ncp and dbz to ok
 		     long ifile,
@@ -228,9 +228,7 @@ public:
 
   long getLongRandom(
 		     long vmin,
-		     long vlim,
-		     random_data *randState);
-
+		     long vlim);
 
   bool isOkDouble( double val);
 
@@ -269,13 +267,13 @@ public:
   bool allocateCellMat();
   void freeCellMat();
   bool calcWinds();
-  
+
 private:
 
   // These are filled when parsing arguments
 
   bool preGridded;
-  
+
   long bugs;
   int testMode;
   double * synWinds;
@@ -317,21 +315,21 @@ private:
   std::string outTxt;
   std::string outNc;
   double * detailSpec;
-  
+
   double earthRadiusMeter;
   double flattening;
-  
+
   double basex;
   double basey;
 
   double radarAlt;
-  
+
   long nradx;
   long nrady;
   long nradz;
 
   int ndim;
-  
+
   bool verbose;
 
   struct timeval timea;
@@ -351,7 +349,7 @@ private:
   double minNcp;
 
   Cell *** cellMat;
-  
+
 }; // end class
 
 #endif
