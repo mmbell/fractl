@@ -13,6 +13,8 @@
 #include <string>
 #include "Fractl.hh"
 #include "Params.hh"
+#include "Filters.hh"
+#include "Interps.hh"
 
 // Eigen linear algebra library
 // http://eigen.tuxfamily.org/index.php?title=Main_Page
@@ -48,6 +50,25 @@ bool Fractl::calcWinds()
 	      cellMat);
     printRunTime("calcAllVU", &timea);
 
+    // Run low-pass filtering if requested
+    
+    Filter *filter = FilterFactory::createFilter(uvFilter);
+    if (filter != NULL) {
+      filter->filter_U(cellMat, nradx, nrady, nradz, 1, NULL);
+      filter->filter_V(cellMat, nradx, nrady, nradz, 1, NULL);
+      delete filter;
+    }
+
+    // Run interpolation for missing data if requested
+    // TODO: add old RadarWind interpolation and code Interp::interpolate
+    
+    Interp *interp = InterpFactory::createInterp(uvInterp);
+    if (interp != NULL) {
+      interp->interpolate_U(cellMat, nradx, nrady, nradz, std::numeric_limits<double>::quiet_NaN());
+      interp->interpolate_V(cellMat, nradx, nrady, nradz, std::numeric_limits<double>::quiet_NaN());      
+      delete interp;
+    }
+
     // NO LONGER USED:
     // Interpolate missing values from neighbors.
     //
@@ -71,6 +92,14 @@ bool Fractl::calcWinds()
     calcAllW(cellMat);
     printRunTime("calcAllW", &timea);
 
+    // Run low-pass filtering on W if requested
+    
+    filter = FilterFactory::createFilter(wFilter);
+    if (filter != NULL) {
+      filter->filter_W(cellMat, nradx, nrady, nradz, 1, NULL);
+      delete filter;
+    }
+    
     // Calc deltas using verification data, if any.
     // Write outTxt file.
     checkVerif(imain, cellMat);

@@ -30,7 +30,9 @@ bool Fractl::parseArgs(int argc, char *argv[])
 	"mumNbrMax", "maxDistBase", "maxDistFactor", "forceOk",
 	"useEigen", "preGridded", "inDir", "fileRegex", "fileList",
 	"radialName", "dbzName", "ncpName", "outText", "outNc",
-	"detailSpec", "radarAlt" } );
+	"detailSpec", "radarAlt",
+	"uvFilter", "wFilter", "uvSteps", "uvMultiStep",
+	"wStep", "wMultiStep" "uvInterp" } );
 
   tdrp_override_t override;
   TDRP_init_override(&override);
@@ -122,6 +124,15 @@ bool Fractl::parseArgs(int argc, char *argv[])
     outTxt = params.outTxt;
   if (strcmp(params.outNc, "not_set"))        
     outNc = params.outNc;
+
+  uvFilter = params.uvFilter;
+  wFilter = params.wFilter;
+  uvSteps = params.uvSteps;
+  wSteps = params.wSteps;
+  uvInterp = params.uvInterp;
+
+  uvMultiStep = parseMultiStep(params.uvMultiStep);
+  wMultiStep = parseMultiStep(params.wMultiStep);  
   
   if (strcmp(params.detailSpec, "not_set")) {
     detailSpec = new double[4];
@@ -319,6 +330,28 @@ void Fractl::badparms( const string msg, ...) {
   cout << "                  Specifies a region for detailed logging." << endl;
   cout << "                  Used for debugging only." << endl;
   cout << endl;
+  cout << "  -uvFilter       Filtering method to use on U and V" << endl;
+  cout << "                     Default FILTER_OFF" << endl;
+  cout << endl;
+  cout << "  -wFilter        Filtering method to use on W" << endl;
+  cout << "                     Default FILTER_OFF" << endl;
+  cout << endl;
+  cout << "  -uvStep         How many steps to use in the filtering" << endl;
+  cout << "                     This is used for all dimensions" << endl;
+  cout << "                     Use uvMultiStep to specify individual steps instead" << endl;
+  cout << endl;
+  cout << "  -wStep         How many steps to use in the filtering" << endl;
+  cout << "                     This is used for all dimensions" << endl;
+  cout << "                     Use wMultiStep to specify individual steps instead" << endl;
+  cout << endl;
+  cout << "  -uvMultiStep   How many steps to use in the filtering" << endl;
+  cout << "                     Enter one value per dimension for example \"1,2,3\"" << endl;
+  cout << endl;
+  cout << "  -wMultiStep    How many steps to use in the filtering" << endl;
+  cout << "                     Enter one value per dimension for example \"1,2,3\"" << endl;
+  cout << endl;
+  cout << " -uvInterp       What method to use to interpolate missing U and V values" << endl;
+  cout << "                     Default INTERP_NONE" << endl;
   cout << endl;
 
   exit(1);
@@ -389,3 +422,22 @@ bool Fractl::parseDetailSpec(char *param, double *spec)
   return true;
 }
   
+int *Fractl::parseMultiStep(char *param)
+{
+  if ( ! strcmp(param, "not_set"))
+    return NULL;
+  vector<std::string> tokvec;
+  splitString(param, ",", tokvec);
+  int nitems = tokvec.size();
+  if(nitems > 3) {
+    std::cerr << "A maximum of 3 item is expected for multiSpec. Spec ignored" << std::endl;
+    return NULL;
+  }
+  
+  int *retval = new int[3]();
+  
+  for (int ii = 0; ii < nitems; ii++) {
+    retval[ii] = parseLong("multiStep", tokvec.at(ii));
+  }
+  return retval;
+}
