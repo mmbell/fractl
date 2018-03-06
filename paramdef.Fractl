@@ -52,7 +52,7 @@ commentdef {
 }
 
 typedef enum {
-  MODE_NONE, MODE_ALPHA, MODE_BETA, MODE_ZETA, MODE_ZETA_BELTRAMI
+  MODE_NONE, MODE_ALPHA, MODE_BETA, MODE_ZETA, MODE_ZETA_BELTRAMI, MODE_GAMMA
 } testmode_t;
 
 paramdef enum testmode_t {
@@ -84,6 +84,10 @@ paramdef enum testmode_t {
    "       Specify synWinds: 0,0,0\n"
    "       This is only useful for swp files generated\n"
    "       by Michael Bell's Beltrami flow simulation.\n"
+   "     MODE_GAMMA:\n"
+   "       Like zeta, but compare the results with\n"
+   "       the constant flow and print statistics.\n"
+   "       Specify synWinds: 0,0,0\n"
    ;
 } testMode;
 
@@ -91,7 +95,7 @@ paramdef string {
   p_desc = "radar file filter: start,limit";
   p_help = "Use radar files i: start <= i < limit.\nRead all files if start == limit == 0";
 } radFiles;
-  
+
 commentdef {
    p_header = "SYN WIND";
 }
@@ -336,12 +340,3 @@ paramdef enum interp_t {
   p_desc = "Missing U and V value interpolation";
   p_help = "Applied before calculating W";
 } uvInterp;
-
-
-
-
-
-
-
-
-

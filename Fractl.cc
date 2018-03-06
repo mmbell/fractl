@@ -471,6 +471,12 @@ void Fractl::checkVerif(
           }
         }
 
+        else if (testMode == Params::MODE_GAMMA) {
+          verVels[0] = synWinds[0];
+          verVels[1] = synWinds[1];
+          verVels[2] = synWinds[2];
+        }
+
         else throwerr("invalid testMode");
 
         double wdiff = cellMat[iz][iy][ix].ww - verVels[0];   // W
@@ -522,6 +528,9 @@ void Fractl::checkVerif(
           << "  " << (pcell->ww - verVels[0])
           << "  " << (pcell->vv - verVels[1])
           << "  " << (pcell->uu - verVels[2])
+          << "  std:"
+          << "  " << pcell->ustd
+          << "  " << pcell->vstd
           << "  meanNbrElevDeg: " << pcell->meanNbrElevDeg
           << "  meanNbrKeepDist: " << pcell->meanNbrKeepDist
           << "  meanNbrOmitDist: " << pcell->meanNbrOmitDist

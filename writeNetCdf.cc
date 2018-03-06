@@ -3,7 +3,7 @@
 // ** University Corporation for Atmospheric Research (UCAR)
 // ** National Center for Atmospheric Research (NCAR)
 // ** Colorado State University
-// ** BSD licence applies 
+// ** BSD licence applies
 // ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -35,6 +35,9 @@ void Fractl::writeNetcdf()
   float * dbzLinear = new float[ totalLen];
   float * ncpLinear = new float[ totalLen];
   float * condNumLinear = new float[ totalLen];
+  float * ustdLinear = new float[ totalLen];
+  float * vstdLinear = new float[ totalLen];
+  float * wstdLinear = new float[ totalLen];
   for (long iz = 0; iz < nradz; iz++) {
     for (long iy = 0; iy < nrady; iy++) {
       for (long ix = 0; ix < nradx; ix++) {
@@ -46,6 +49,9 @@ void Fractl::writeNetcdf()
         dbzLinear[kk] = cellMat[iz][iy][ix].meanNbrDbz;
         ncpLinear[kk] = cellMat[iz][iy][ix].meanNbrNcp;
         condNumLinear[kk] = cellMat[iz][iy][ix].conditionNumber;
+        ustdLinear[kk] = cellMat[iz][iy][ix].ustd;
+        vstdLinear[kk] = cellMat[iz][iy][ix].vstd;
+        wstdLinear[kk] = cellMat[iz][iy][ix].wstd;
 
       } // for ix
     } // for iy
@@ -53,7 +59,7 @@ void Fractl::writeNetcdf()
 
   string fname;
   if (outNc[outNc.length()-1] == '/') {
-    // file name format: outNc/yyyymmdd/ncf_yyyymmdd_hhmmss.nc                                       
+    // file name format: outNc/yyyymmdd/ncf_yyyymmdd_hhmmss.nc
     time_t tm = timeMax;
     struct tm tmstr;
     gmtime_r( &tm, &tmstr);
@@ -66,7 +72,7 @@ void Fractl::writeNetcdf()
       cout << "fulldate: \"" << fulldate << "\"" << endl;
       cout << "subdirname: \"" << subdirname << "\"" << endl;
     }
-    
+
     if ( (mkdir( subdirname.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) != 0) &&
 	 (errno != EEXIST))  {
       std::cerr <<  "Couldn't mkdir" <<  subdirname << ": "
@@ -74,7 +80,7 @@ void Fractl::writeNetcdf()
 		<< "                 Writing the output to /tmp" << std::endl;
       subdirname = "/tmp";
     }
-    
+
     fname = subdirname + "/ncf_" + fulldate.substr( 0, 8) + "_"
       + fulldate.substr( 8, 6) + ".nc";
   }
@@ -87,7 +93,7 @@ void Fractl::writeNetcdf()
     std::cerr << "Couldn't create output NetCDF file " << fname << std::endl;
     return;
   }
-  
+
   ncout.add_att("Conventions", "CF-1.5");
 
   // Dimension arrays
@@ -168,27 +174,27 @@ void Fractl::writeNetcdf()
   timeStopVar->add_att("standard_name", "stop_time");
   timeStopVar->add_att("units", "s");
 
-  Nc3Var * wVar = ncout.add_var("upward_air_velocity", nc3Float, 4, dataDims4);
+  Nc3Var * wVar = ncout.add_var("W", nc3Float, 4, dataDims4);
   wVar->add_att("standard_name", "upward_air_velocity");
   wVar->add_att("units", "m s-1");
   wVar->add_att("grid_mapping", "grid_mapping_0");
 
-  Nc3Var * vVar = ncout.add_var("northward_wind", nc3Float, 4, dataDims4);
+  Nc3Var * vVar = ncout.add_var("V", nc3Float, 4, dataDims4);
   vVar->add_att("standard_name", "northward_wind");
   vVar->add_att("units", "m s-1");
   vVar->add_att("grid_mapping", "grid_mapping_0");
 
-  Nc3Var * uVar = ncout.add_var("eastward_wind", nc3Float, 4, dataDims4);
+  Nc3Var * uVar = ncout.add_var("U", nc3Float, 4, dataDims4);
   uVar->add_att("standard_name", "eastward_wind");
   uVar->add_att("units", "m s-1");
   uVar->add_att("grid_mapping", "grid_mapping_0");
 
-  Nc3Var * dbzVar = ncout.add_var("meanNbrDbz", nc3Float, 4, dataDims4);
+  Nc3Var * dbzVar = ncout.add_var("DBZ", nc3Float, 4, dataDims4);
   dbzVar->add_att("standard_name", "mean_neighbor_dbz");
   dbzVar->add_att("units", "1");  // Apparently CF uses "1" to mean ratio
   dbzVar->add_att("grid_mapping", "grid_mapping_0");
 
-  Nc3Var * ncpVar = ncout.add_var("meanNbrNcp", nc3Float, 4, dataDims4);
+  Nc3Var * ncpVar = ncout.add_var("NCP", nc3Float, 4, dataDims4);
   ncpVar->add_att("standard_name", "mean_neighbor_ncp");
   ncpVar->add_att("units", "1");  // Apparently CF uses "1" to mean ratio
   ncpVar->add_att("grid_mapping", "grid_mapping_0");
@@ -197,6 +203,21 @@ void Fractl::writeNetcdf()
   condNumVar->add_att("standard_name", "matrix_condition_number");
   condNumVar->add_att("units", "1");
   condNumVar->add_att("grid_mapping", "grid_mapping_0");
+
+  Nc3Var * wstdVar = ncout.add_var("W_std", nc3Float, 4, dataDims4);
+  wstdVar->add_att("standard_name", "w_std_deviation");
+  wstdVar->add_att("units", "m s-1");
+  wstdVar->add_att("grid_mapping", "grid_mapping_0");
+
+  Nc3Var * vstdVar = ncout.add_var("V_std", nc3Float, 4, dataDims4);
+  vstdVar->add_att("standard_name", "v_std_deviation");
+  vstdVar->add_att("units", "m s-1");
+  vstdVar->add_att("grid_mapping", "grid_mapping_0");
+
+  Nc3Var * ustdVar = ncout.add_var("U_std", nc3Float, 4, dataDims4);
+  ustdVar->add_att("standard_name", "u_std_deviation");
+  ustdVar->add_att("units", "m s-1");
+  ustdVar->add_att("grid_mapping", "grid_mapping_0");
 
   // Write coord vars
   tvar->put( tvals, ntime);
@@ -257,6 +278,9 @@ void Fractl::writeNetcdf()
   dbzVar->put( dbzLinear, counts4);
   ncpVar->put( ncpLinear, counts4);
   condNumVar->put( condNumLinear, counts4);
+  wstdVar->put( wstdLinear, counts4);
+  vstdVar->put( vstdLinear, counts4);
+  ustdVar->put( ustdLinear, counts4);
 
   // The Nc3File destructor automatically closes the file.
 
@@ -271,6 +295,8 @@ void Fractl::writeNetcdf()
   delete[] dbzLinear;
   delete[] ncpLinear;
   delete[] condNumLinear;
+  delete[] wstdLinear;
+  delete[] vstdLinear;
+  delete[] ustdLinear;
 
 } // end writeNetcdf
-

@@ -3,7 +3,7 @@
 // ** University Corporation for Atmospheric Research (UCAR)
 // ** National Center for Atmospheric Research (NCAR)
 // ** Colorado State University
-// ** BSD licence applies 
+// ** BSD licence applies
 // ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -28,6 +28,9 @@ double meanNbrKeepDist;  // mean( distance from cell center) of keep nbrs
 double meanNbrOmitDist;  // mean( distance from cell center) of omit nbrs
 double conditionNumber;
 
+double ustd;             // variance in U from geometry
+double vstd;             // variance in V from geometry
+double wstd;             // variance in W from geometry
 
 Cell()
 {
@@ -41,6 +44,10 @@ Cell()
   this->meanNbrKeepDist = std::numeric_limits<double>::quiet_NaN();
   this->meanNbrOmitDist = std::numeric_limits<double>::quiet_NaN();
   this->conditionNumber = std::numeric_limits<double>::quiet_NaN();
+
+  this->ustd = std::numeric_limits<double>::quiet_NaN();
+  this->vstd = std::numeric_limits<double>::quiet_NaN();
+  this->wstd = std::numeric_limits<double>::quiet_NaN();
 } // end constructor
 
 

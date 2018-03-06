@@ -16,7 +16,7 @@ LeiseFilter::~LeiseFilter()
 // The ns parameter is what was passed in the COMMON section in the
 // original Fortran code. If not passed in it will default to all 0's
 
-bool LeiseFilter::filter(double *y, int n1, int n2, int n3, 
+bool LeiseFilter::filter(double *y, int n1, int n2, int n3,
 			 int nstep, int *ns)
 {
   /* System generated locals */
@@ -82,11 +82,12 @@ bool LeiseFilter::filter(double *y, int n1, int n2, int n3,
   i__1 = ndim;
 
   // Default ns values if ns was not passed in
-  int default_ns[ndim] = {0};
+  int default_ns[ndim];
+  memset(default_ns, 0, ndim*sizeof(int));
   if (ns == NULL) {
     ns = default_ns;
   }
-  
+
   for (n = 1; n <= i__1; ++n) {
     nns[n - 1] = ns[n - 1];
     if (ns[n - 1] == 0) {
@@ -100,9 +101,9 @@ bool LeiseFilter::filter(double *y, int n1, int n2, int n3,
     i__2 = mpyrmd, i__3 = nns[n - 1] + nns[n - 1] - 1;
     mpyrmd = max(i__2,i__3);
   }
-  
+
   // -------------------
-  
+
   if (mpyrmd <= 0) {
     return false;
   }
@@ -143,15 +144,15 @@ bool LeiseFilter::filter(double *y, int n1, int n2, int n3,
 	    ln = kn + (kstop - kn) / m1 * m1;
 
 	    /*    FILTER THE ENDS USING A MIRROR EXTENSION. */
-	    ykn = y[kn] * (double).875 + y[kn + m1] * (double).1875 
+	    ykn = y[kn] * (double).875 + y[kn + m1] * (double).1875
 	      - y[kn + m2] * (double).0625;
-	    yln = y[ln] * (double).875 + y[ln - m1] * (double).1875 
+	    yln = y[ln] * (double).875 + y[ln - m1] * (double).1875
 	      - y[ln - m2] * (double).0625;
 	    ykn1 = y[kn] * (double).1875 + y[kn + m1] * (double)
-	      .625 + y[kn + m2] * (double).25 - y[kn + m3] * 
+	      .625 + y[kn + m2] * (double).25 - y[kn + m3] *
 	      (double).0625;
 	    yln1 = y[ln] * (double).1875 + y[ln - m1] * (double)
-	      .625 + y[ln - m2] * (double).25 - y[ln - m3] * 
+	      .625 + y[ln - m2] * (double).25 - y[ln - m3] *
 	      (double).0625;
 
 	    /*    DO THE CENTRAL 5-PT FILTER. */

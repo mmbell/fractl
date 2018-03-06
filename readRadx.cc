@@ -3,7 +3,7 @@
 // ** University Corporation for Atmospheric Research (UCAR)
 // ** National Center for Atmospheric Research (NCAR)
 // ** Colorado State University
-// ** BSD licence applies 
+// ** BSD licence applies
 // ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -113,13 +113,13 @@ void Fractl::readRadarFile(
 {
   RadxFile rxfile;
   RadxVol rxvol;
-  
+
   if (0 != rxfile.readFromPath( fspec->fpath, rxvol))
     badparms("cannot read file: \"%s\"", fspec->fpath.c_str());
 
   double tmStart = rxvol.getStartTimeSecs() + 1.e-9 * rxvol.getStartNanoSecs();
   double tmEnd = rxvol.getEndTimeSecs() + 1.e-9 * rxvol.getEndNanoSecs();
-  
+
   std::cout << "\n\nreadRadarFile:" << std::endl
     << "    fpath:         " << fspec->fpath << std::endl
     << "    startTime:     " << formatTime( tmStart) << std::endl
@@ -127,7 +127,7 @@ void Fractl::readRadarFile(
     << "    latitudeDeg:   " << rxvol.getLatitudeDeg() << std::endl
     << "    longitudeDeg:  " << rxvol.getLongitudeDeg() << std::endl
     << "    altitudeKm:    " << rxvol.getAltitudeKm() << std::endl;
-  
+
   if (bugs >= Params::DEBUG_VERBOSE) {
     std::cout << std::endl << std::endl << "readRadarFile: RadxVol: " << std::endl;
     rxvol.print( std::cout);
@@ -138,11 +138,11 @@ void Fractl::readRadarFile(
   fspec->altitudeKmMsl = rxvol.getAltitudeKm();
   fspec->latitudeDeg = rxvol.getLatitudeDeg();
   fspec->longitudeDeg = rxvol.getLongitudeDeg();
-  
+
   // Get coords for debug only
   double tmpy;            // northing in meters
   double tmpx;            // easting in meters
-  
+
   latLonToYX(
     projLon0,             // central meridian of projection
     basey,                // coord y base, km
@@ -216,7 +216,7 @@ void Fractl::readRadarFile(
       aircraftx);           // output value
 
     aircraftBbox->addOb( aircraftAltKmMsl, aircrafty, aircraftx);
-    
+
     double rayTime = ray->getTimeDouble();
     if (std::isnan(timeMin) || rayTime < timeMin) timeMin = rayTime;
     if (std::isnan(timeMax) || rayTime > timeMax) timeMax = rayTime;
@@ -292,7 +292,7 @@ void Fractl::readRadarFile(
       std::cout << std::endl;
       std::cout << "end RadxRay" << std::endl;
       std::cout << "readRadarFile: iray: " << iray
-        << "  rotation: " << ray->getGeoreference()->getRotation()
+        //<< "  rotation: " << ray->getGeoreference()->getRotation()
         << "  ray time: " << formatTime( ray->getTimeDouble()) << std::endl;
     }
 
@@ -367,7 +367,7 @@ void Fractl::readRadarFile(
     addDeltaTime( &timei, NULL);
 
     // TODO bring out loop invariants
-    
+
     for (size_t ipt = 0; ipt < fieldVg->getNPoints(); ipt++) {
       struct timeval timej;
       addDeltaTime( &timej, NULL);
@@ -397,7 +397,7 @@ void Fractl::readRadarFile(
       // Calc error of the simple version
       double errHoriz = flatHorizDistKm - horizDistKm;
       double errVert = flatAltKmMsl - altKmMsl;
-      
+
       if (fabs(errHoriz) > *maxAbsErrHoriz)
         *maxAbsErrHoriz = fabs(errHoriz);
       if (fabs(errVert) > *maxAbsErrVert)
@@ -429,7 +429,7 @@ void Fractl::readRadarFile(
 
       if (bugs >= Params::DEBUG_VERBOSE)
 	std::cout << "valVg: " << valVg << ", valDbz: " << valDbz << ", valNcp: " << valNcp << std::endl;
-      
+
       cntTimej++;
       addDeltaTime( &timej, &sumTimej);
       struct timeval timek;
@@ -481,7 +481,7 @@ void Fractl::readRadarFile(
           lonDeg,
           coordy,            // output value
           coordx);           // output value
-	
+
         if (bugs >= Params::DEBUG_VERBOSE) {
           std::cout << setprecision(15);
           std::cout << "    add ob: altKmMsl: " << altKmMsl
@@ -521,10 +521,10 @@ void Fractl::readRadarFile(
 
 	  // testModes explained in Args.cc
 
-          if (testMode != Params::MODE_ZETA) {
+          if ((testMode != Params::MODE_ZETA) && (testMode != Params::MODE_GAMMA)) {
 
 	    // Use synthetic wind data
-	    
+
             double synVels[3];    // W, V, U
 
             if (testMode == Params::MODE_BETA) {
@@ -579,7 +579,7 @@ void Fractl::readRadarFile(
           statVg->addOb( valVg);
           statDbz->addOb( valDbz);
           statNcp->addOb( valNcp);
-	  
+
           if (bugs >= Params::DEBUG_EXTRA || itotpt % 10000 == 0) {
             std::cout << setprecision(5);
             std::cout << "readRadarFile: ok:"
