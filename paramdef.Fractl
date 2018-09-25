@@ -283,12 +283,59 @@ paramdef string {
    p_help = "NCP for Eldora, NC for CSU-CHILL";
 } ncpName;
 
+commentdef {
+  p_header = "FILTERS";
+};
 
+typedef enum {
+  FILTER_NONE, FILTER_LEISE
+} filter_t;
 
+paramdef enum filter_t {
+  p_default = FILTER_NONE;
+  p_desc = "Low pass filter to apply to U and V";
+} uvFilter;
 
+paramdef enum filter_t {
+  p_default = FILTER_NONE;
+  p_desc = "Low pass filter to apply to W";
+} wFilter;
 
+paramdef int {
+  p_default = 1;
+  p_desc = "Number of steps for U and V filtering algorithm";
+  p_help = "Applies to all dimensions. Use uvMultiSteps for dimention specific steps";
+} uvSteps;
 
+paramdef string {
+  p_desc = "Dimension specific steps for U and V filtering";
+  p_help = "Comma separated steps.\nExample: \"1,2,1\"";
+} uvMultiStep;
 
+paramdef int {
+  p_default = 1;
+  p_desc = "Number of steps for W filtering algorithm";
+  p_help = "Applies to all dimensions";
+} wSteps;
+
+paramdef string {
+  p_desc = "Dimension specific steps for W filtering";
+  p_help = "Comma separated steps.\nExample: \"1,2,1\"";
+} wMultiStep;
+
+commentdef {
+  p_header = "INTERPOLATION";
+};
+
+typedef enum {
+  INTERP_NONE, INTERP_LEISE, INTERP_RADAR_WIND
+} interp_t;
+
+paramdef enum interp_t {
+  p_default = INTERP_NONE;
+  p_desc = "Missing U and V value interpolation";
+  p_help = "Applied before calculating W";
+} uvInterp;
 
 
 

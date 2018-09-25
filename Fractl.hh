@@ -21,9 +21,11 @@
 #include "Point.hh"
 #include "FileSpec.hh"
 
-// See kdtree source at:
-//   cvs/libs/kd/src/include/kd/kd.hh
-//   cvs/libs/kd/src/kd/kd.cc
+#include "Params.hh"
+
+// The kd sources are part of the lrose-core distribution
+//   ..../libs/kd/src/include/kd/kd.hh
+//   ..../libs/kd/src/kd/kd.cc
 
 #include <kd/kd.hh>
 
@@ -91,7 +93,7 @@ public:
   bool parseRadFiles(char *param, long *radFiles);
   bool parseGridSpec(char *param, double &min, double &max, double &step);
   bool parseDetailSpec(char *param, double *spec);
-  
+  int *parseMultiStep(char *param);
   bool checkArgs();
   void dumpArgs();
 
@@ -257,7 +259,6 @@ public:
   string formatTime( double dtm);
 
   long parseLong( string msg, string stg);
-
   double parseDouble( string msg, string stg);
 
   bool parseBool( string msg, string stg);
@@ -350,6 +351,15 @@ private:
   double minDbz;
   double minNcp;
 
+  // These are related to filtering and interpolation
+
+  Params::filter_t uvFilter, wFilter;
+  int uvSteps, wSteps;
+  int *uvMultiStep, *wMultiStep;
+  Params::interp_t uvInterp;
+
+  // The data
+  
   Cell *** cellMat;
   
 }; // end class

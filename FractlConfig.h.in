@@ -1,0 +1,5 @@
+// the configured options and settings for FRACTL
+// Modify in the CMakeLists.txt
+
+#define FRACTL_VERSION_MAJOR @FRACTL_VERSION_MAJOR@
+#define FRACTL_VERSION_MINOR @FRACTL_VERSION_MINOR@

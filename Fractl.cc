@@ -154,6 +154,8 @@
 #include "Fractl.hh"
 #include "Params.hh"
 
+#include "FractlConfig.h" // version number
+
 using namespace std;
 
 
@@ -177,7 +179,8 @@ int main( int argc, char * argv[])
 
 //==================================================================
 
-const GeographicLib::TransverseMercatorExact Fractl::tranMerc = GeographicLib::TransverseMercatorExact::UTM();
+const GeographicLib::TransverseMercatorExact Fractl::tranMerc =
+  GeographicLib::TransverseMercatorExact::UTM();
 
 
 //==================================================================

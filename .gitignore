@@ -1,0 +1,11 @@
+*.o
+*~
+run_cmake
+doit
+Params.cc
+Params.hh
+CMakeFiles
+CMakeCache.txt
+Fractl
+
+
