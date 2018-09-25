@@ -3,5 +3,9 @@
 run_cmake
 doit
 Params.cc
-Params.h
+Params.hh
+CMakeFiles
+CMakeCache.txt
+Fractl
+
 
