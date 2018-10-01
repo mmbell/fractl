@@ -22,12 +22,11 @@ LINK_FLAGS= \
 	-Wl,-rpath,$(ZIP_LIB_DIR) \
 	-Wl,-rpath,$(LROSE_LIB_DIR)
 
-OBJS = Args.o Fractl.o readRadx.o readPreGridded.o calcWinds.o \
-       writeNetCdf.o Params.o LeiseFilter.o Filters.o Utils.o Interps.o LeiseInterp.o RadarWindInterp.o
+OBJS = Args.o Filters.o Fractl.o readRadx.o readPreGridded.o calcWinds.o \
+       writeNetCdf.o Params.o LeiseFilter.o LeiseInterp.o \
+       RadarWindInterp.o Interps.o Utils.o 
 
 all: Fractl
-
-LeiseFilter.cc : Filters.hh
 
 Fractl: $(OBJS)
 	$(CXX) $(CXX_FLAGS) -o Fractl $(OBJS) $(LIBS) $(LINK_FLAGS)

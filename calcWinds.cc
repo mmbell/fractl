@@ -321,7 +321,7 @@ void Fractl::calcCellVU(
     double maxDist = maxDistBase + maxDistFactor * aircraftDist;
 
     // Use local distance constraint from grid point center
-    double roi = sqrt(xgridinc*xgridinc + ygridinc*ygridinc + zgridinc*zgridinc);
+    double roi = sqrt(xgridinc  *xgridinc + ygridinc * ygridinc + zgridinc * zgridinc);
     if (roi < maxDist) maxDist = roi;
 
     const char * msg;
@@ -456,7 +456,7 @@ void Fractl::calcCellVU(
       // to have extreme values for U and V.
       double conditionNumberCutoff = 100;     // xxxx
       if (pcell->conditionNumber < conditionNumberCutoff)
-	     isCellOk = true;
+	isCellOk = true;
       if (isCellOk) {
         Eigen::VectorXd xvec = svd.solve( bvec);
         Eigen::VectorXd errvec = amat * xvec - bvec;
@@ -468,6 +468,7 @@ void Fractl::calcCellVU(
 
         double ustd = 0;
         double vstd = 0;
+	
         for (long s = 0; s < slen; s++) {
           double thin0 = thinV(0, s);
           double thin1 = thinV(1, s);

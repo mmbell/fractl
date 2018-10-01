@@ -23,9 +23,9 @@
 
 #include "Params.hh"
 
-// See kdtree source at:
-//   cvs/libs/kd/src/include/kd/kd.hh
-//   cvs/libs/kd/src/kd/kd.cc
+// The kd sources are part of the lrose-core distribution
+//   ..../libs/kd/src/include/kd/kd.hh
+//   ..../libs/kd/src/kd/kd.cc
 
 #include <kd/kd.hh>
 
