@@ -3,7 +3,7 @@
 // ** University Corporation for Atmospheric Research (UCAR)
 // ** National Center for Atmospheric Research (NCAR)
 // ** Colorado State University
-// ** BSD licence applies 
+// ** BSD licence applies
 // ** DISCLAIMER: THIS SOFTWARE IS PROVIDED "AS IS" AND WITHOUT ANY EXPRESS
 // ** OR IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
 // ** WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
@@ -51,7 +51,7 @@ bool Fractl::calcWinds()
     printRunTime("calcAllVU", &timea);
 
     // Run low-pass filtering if requested
-    
+
     Filter *filter = FilterFactory::createFilter(uvFilter);
     if (filter != NULL) {
       filter->filter_U(cellMat, nradx, nrady, nradz, 1, NULL);
@@ -61,11 +61,11 @@ bool Fractl::calcWinds()
 
     // Run interpolation for missing data if requested
     // TODO: add old RadarWind interpolation and code Interp::interpolate
-    
+
     Interp *interp = InterpFactory::createInterp(uvInterp);
     if (interp != NULL) {
       interp->interpolate_U(cellMat, nradx, nrady, nradz, std::numeric_limits<double>::quiet_NaN());
-      interp->interpolate_V(cellMat, nradx, nrady, nradz, std::numeric_limits<double>::quiet_NaN());      
+      interp->interpolate_V(cellMat, nradx, nrady, nradz, std::numeric_limits<double>::quiet_NaN());
       delete interp;
     }
 
@@ -93,13 +93,13 @@ bool Fractl::calcWinds()
     printRunTime("calcAllW", &timea);
 
     // Run low-pass filtering on W if requested
-    
+
     filter = FilterFactory::createFilter(wFilter);
     if (filter != NULL) {
       filter->filter_W(cellMat, nradx, nrady, nradz, 1, NULL);
       delete filter;
     }
-    
+
     // Calc deltas using verification data, if any.
     // Write outTxt file.
     checkVerif(imain, cellMat);
@@ -121,7 +121,7 @@ void Fractl::calcAllVU(
 
   KD_real * centerLoc = new KD_real[ndim];
   long okCount = 0;
-  
+
   for (long iz = 0; iz < nradz; iz++) {
     for (long iy = 0; iy < nrady; iy++) {
       for (long ix = 0; ix < nradx; ix++) {
@@ -177,7 +177,7 @@ void Fractl::calcAllVU(
   } // for iz
 
   cout << "---------------- okCount: " << okCount << endl;
-  
+
   cout << "sumTimea: " << sumTimea << endl;
   cout << "cntTimeb: " << cntTimeb << "  sumTimeb: " << sumTimeb << endl;
   cout << "sumTimec: " << sumTimec << endl;
@@ -311,7 +311,7 @@ void Fractl::calcCellVU(
   int numNbrActual = 0;
 
   // Keep points within base + factor * aircraft dist
-  
+
   for (long inbr = 0; inbr < numNbrMax; inbr++) {
     if (nbrIxs[inbr] < 0) throwerr("nbrIxs < 0");
 
@@ -319,7 +319,11 @@ void Fractl::calcCellVU(
     double aircraftDist = calcDistPtAircraft( nearPt);
     double localDist = calcDistLocPt( centerLoc, nearPt);
     double maxDist = maxDistBase + maxDistFactor * aircraftDist;
-    
+
+    // Use local distance constraint from grid point center
+    double roi = sqrt(xgridinc  *xgridinc + ygridinc * ygridinc + zgridinc * zgridinc);
+    if (roi < maxDist) maxDist = roi;
+
     const char * msg;
 
     if (localDist < maxDist) {
@@ -432,7 +436,9 @@ void Fractl::calcCellVU(
       Eigen::JacobiSVD<Eigen::MatrixXd> svd(
         amat, Eigen::ComputeThinU | Eigen::ComputeThinV);
       Eigen::VectorXd singVals = svd.singularValues();
+      Eigen::MatrixXd thinV = svd.matrixV();
       long slen = singVals.size();
+      long vlen = thinV.rows();
 
       pcell->conditionNumber = numeric_limits<double>::infinity();
       if (slen > 0 && singVals[slen-1] != 0)
@@ -448,7 +454,7 @@ void Fractl::calcCellVU(
 
       // Using a conditionNumberCutoff > 10 causes some cells
       // to have extreme values for U and V.
-      double conditionNumberCutoff = 10;     // xxxx
+      double conditionNumberCutoff = 100;     // xxxx
       if (pcell->conditionNumber < conditionNumberCutoff)
 	isCellOk = true;
       if (isCellOk) {
@@ -459,8 +465,22 @@ void Fractl::calcCellVU(
 
         pcell->vv = xvec(1);       // v
         pcell->uu = xvec(0);       // u
+
+        double ustd = 0;
+        double vstd = 0;
+	
+        for (long s = 0; s < slen; s++) {
+          double thin0 = thinV(0, s);
+          double thin1 = thinV(1, s);
+          double sing = singVals[s];
+          ustd += pow( (thinV(s, 0) / singVals[s]) , 2.0);
+          vstd += pow( (thinV(s, 1) / singVals[s]) , 2.0);
+        }
+        pcell->ustd = sqrt(ustd);
+        pcell->vstd = sqrt(vstd);
       } // if isCellOk
     } // if useEigen
+
 
     // Else use cramer's method
     else {
@@ -503,7 +523,7 @@ void Fractl::calcCellVU(
       // A detCutoff of 0.1 gives roughly similar results to using
       // a conditionNumber cutoff of 10.
       double detCutoff = 0.1;    // xxxxxxxxx
-      
+
       if (fabs(detbase) > detCutoff) {
         pcell->uu = det1 / detbase;
         pcell->vv = det2 / detbase;
@@ -623,7 +643,7 @@ void Fractl::calcAllW(
 
       double totalFlow = 0;
       double sumWgt = 0;
-      
+
       for (long iz = 0; iz < nradz; iz++) {
         if ( isOkDouble( cellMat[iz][iy][ix-1].uu)
           && isOkDouble( cellMat[iz][iy][ix+1].uu)
@@ -791,4 +811,3 @@ double Fractl::calcDistPtPt( Point * pta, Point * ptb) {
   sumsq += delta * delta;
   return sqrt( sumsq);
 }
-
