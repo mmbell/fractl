@@ -82,6 +82,11 @@ public:
   } testmode_t;
 
   typedef enum {
+    GRID_MESH = 0,
+    GRID_MISH = 1
+  } grid_type_t;
+
+  typedef enum {
     FILTER_NONE = 0,
     FILTER_LEISE = 1
   } filter_t;
@@ -397,6 +402,8 @@ public:
 
   char* xGrid;
 
+  grid_type_t gridType;
+
   char* projName;
 
   double projLat0;
@@ -464,7 +471,7 @@ private:
 
   void _init();
 
-  mutable TDRPtable _table[55];
+  mutable TDRPtable _table[57];
 
   const char *_className;
 

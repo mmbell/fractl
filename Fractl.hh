@@ -137,6 +137,12 @@ public:
 		 std::vector<Point *> *pointVec,   // all observations
 		 KD_tree * radarKdTree,       // nearest nbr tree for pointVec
 		 Cell *** & cellMat);          // we set Cell.uu, vv
+  
+  void calcAllVUOnMish(
+		 long maxNumNbr,              // max num nearest nbrs
+		 std::vector<Point *> *pointVec,   // all observations
+		 KD_tree * radarKdTree,       // nearest nbr tree for pointVec
+		 Cell *** & cellMat);          // we set Cell.uu, vv
 
   void calcCellVU(
 		  KD_real * centerLoc,           // query point
@@ -146,6 +152,8 @@ public:
 		  Cell * pcell);                  // we fill vv, uu.
 
   void calcAllW(
+		Cell *** & cellMat);          // we set Cell.ww
+  void calcAllWOnMish(
 		Cell *** & cellMat);          // we set Cell.ww
 
   double calcDensity( double height);
@@ -165,6 +173,8 @@ public:
 
 
   void writeNetcdf();
+  void fillMishAxisCoordinates(double *vals, long nrad, double gridmin, double gridincr);
+  void fillMishLatLon(double *latLinear, double *lonLinear);
 
   void checkGrid(
 		 const char * msg,
@@ -306,6 +316,7 @@ private:
   double maxDistFactor;
   bool forceOk;
   bool useEigen;
+
   //xxx also spec max dist of observation from cell center
   std::string inDir;
   std::string fileRegex;
@@ -356,6 +367,8 @@ private:
   int *uvMultiStep, *wMultiStep;
   Params::interp_t uvInterp;
 
+  Params::grid_type_t gridType;
+  
   // The data
 
   Cell *** cellMat;

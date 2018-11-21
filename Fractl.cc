@@ -601,6 +601,7 @@ vector<FileSpec *>* Fractl::readDir(
         }
       }
     }
+    regfree(&regexWk);
   }
   return resvec;
 }
@@ -1403,6 +1404,7 @@ bool Fractl::fillWithObservations()
       return false;
     }
   } // for ifile
+  delete fsubsetList;
   printRunTime("readRadarFiles", &timea);
 
   // xxx del maxAbsErrHoriz, vert
@@ -1527,16 +1529,35 @@ bool Fractl::allocateCellMat()
   //xxx all new: delete
   // Allocate cellMat.
   // Init Cell.ww = 0.
-  cellMat = new Cell**[nradz];
-  for (long iz = 0; iz < nradz; iz++) {
-    cellMat[iz] = new Cell*[nrady];
-    for (long iy = 0; iy < nrady; iy++) {
-      cellMat[iz][iy] = new Cell[nradx];
-      for (long ix = 0; ix < nradx; ix++) {
-        cellMat[iz][iy][ix].ww = 0;
+
+  if (gridType == Params::GRID_MESH) {
+    cellMat = new Cell**[nradz];
+    for (long iz = 0; iz < nradz; iz++) {
+      cellMat[iz] = new Cell*[nrady];
+      for (long iy = 0; iy < nrady; iy++) {
+	cellMat[iz][iy] = new Cell[nradx];
+	for (long ix = 0; ix < nradx; ix++) {
+	  cellMat[iz][iy][ix].ww = 0;
+	}
       }
     }
+  } else {
+    long maxx = (xgridmax - xgridmin) * 2 / xgridinc + 4;
+    long maxy = (ygridmax - ygridmin) * 2 / ygridinc + 4;  
+    long maxz = (zgridmax - zgridmin) * 2 / zgridinc + 4;
+
+    cellMat = new Cell**[maxx];
+    for (long iz = 0; iz < maxz; iz++) {
+      cellMat[iz] = new Cell*[maxy];
+      for (long iy = 0; iy < maxy; iy++) {
+	cellMat[iz][iy] = new Cell[maxx];
+	for (long ix = 0; ix < maxx; ix++) {
+	  cellMat[iz][iy][ix].ww = 0;
+	}
+      }
+    }    
   }
+  
   printRunTime("alloc cellMat", &timea);
   return true;
 }
@@ -1545,12 +1566,22 @@ bool Fractl::allocateCellMat()
 
 void Fractl::freeCellMat()
 {
-  for (long iz = 0; iz < nradz; iz++) {
-    for (long iy = 0; iy < nrady; iy++) {
+  long maxy, maxz;
+  
+  if (gridType == Params::GRID_MESH) {
+    maxy = nrady;
+    maxz = nradz;
+  } else {
+    maxy = (ygridmax - ygridmin) * 2 / ygridinc + 4;
+    maxz = (zgridmax - zgridmin) * 2 / zgridinc + 4;
+  }
+  for (long iz = 0; iz < maxz; iz++) {
+    for (long iy = 0; iy < maxy; iy++) {
       delete[] cellMat[iz][iy];
     }
     delete[] cellMat[iz];
   }
+  
   delete[] cellMat;
   cellMat = NULL;
 }

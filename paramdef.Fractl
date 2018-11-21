@@ -141,6 +141,20 @@ paramdef string {
 } xGrid;
 
 commentdef {
+  p_header = "GRID_TYPE";
+};
+
+typedef enum {
+  GRID_MESH, GRID_MISH
+} grid_type_t;
+
+paramdef enum grid_type_t {
+  p_default = GRID_MESH;
+  p_desc = "What kind of grid to use";
+  p_help = "Mesh for stand-alone. Mish for Samurai input";
+} gridType;;
+
+commentdef {
    p_header = "PROJECTION";
 };
 
@@ -340,3 +354,4 @@ paramdef enum interp_t {
   p_desc = "Missing U and V value interpolation";
   p_help = "Applied before calculating W";
 } uvInterp;
+

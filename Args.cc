@@ -24,13 +24,13 @@ bool Fractl::parseArgs(int argc, char *argv[])
 {
   std::unordered_set<std::string> keywordSet( {
       "minDbz", "minNcp", "testMode", "synWinds",
-	"radFiles", "zGrid", "yGrid", "xGrid", "projName",
+	"radFiles", "zGrid", "yGrid", "xGrid", "gridType", "projName",
 	"projLat0", "projLon0", "baseW", "epsilon",
 	"maxDeltaAltKm", "maxAbsElevDeg", "minRadialDistKm",
 	"mumNbrMax", "maxDistBase", "maxDistFactor", "forceOk",
 	"useEigen", "preGridded", "inDir", "fileRegex", "fileList",
 	"radialName", "dbzName", "ncpName", "outText", "outNc",
-	"detailSpec", "radarAlt",
+	"detailSpec", "radarAlt", "gridType",
 	"uvFilter", "wFilter", "uvSteps", "uvMultiStep",
 	"wStep", "wMultiStep" "uvInterp" } );
 
@@ -70,7 +70,8 @@ bool Fractl::parseArgs(int argc, char *argv[])
   minDbz = params.minDbz;
   minNcp = params.minNcp;
   testMode = params.testMode;
-
+  gridType = params.gridType;
+  
   synWinds = new double[3];
   if (! parseSynWinds(params.synWinds, synWinds))
     badparms("Invalid synWinds");

@@ -511,7 +511,7 @@ void Fractl::readRadarFile(
             coordy,            // y
             coordx             // x
 				       );
-          if (showDetail) {
+          if (showDetail && (bugs >= Params::DEBUG_NORM)) {
             std::cout << "readRadarFile: showDetail: coordz: " << coordz << std::endl;
             std::cout << "readRadarFile: showDetail: coordy: " << coordy << std::endl;
             std::cout << "readRadarFile: showDetail: coordx: " << coordx << std::endl;
@@ -580,7 +580,7 @@ void Fractl::readRadarFile(
           statDbz->addOb( valDbz);
           statNcp->addOb( valNcp);
 
-          if (bugs >= Params::DEBUG_EXTRA || itotpt % 10000 == 0) {
+          if (bugs >= Params::DEBUG_EXTRA && itotpt % 10000 == 0) {
             std::cout << setprecision(5);
             std::cout << "readRadarFile: ok:"
               << "  iray: " << iray

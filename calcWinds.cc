@@ -43,16 +43,25 @@ bool Fractl::calcWinds()
   for (int imain = 0; imain < 1; imain++) {
     bool showStat = true;
     // Based on current w, calc u, v.
-    calcAllVU(
-	      numNbrMax,       // max num nearest nbrs
-	      pointVec,        // all observations
-	      radarKdTree,     // nearest nbr tree for pointVec
-	      cellMat);
+    if (gridType == Params::GRID_MISH)
+      calcAllVUOnMish(
+		numNbrMax,       // max num nearest nbrs
+		pointVec,        // all observations
+		radarKdTree,     // nearest nbr tree for pointVec
+		cellMat);
+    else
+      calcAllVU(
+		numNbrMax,       // max num nearest nbrs
+		pointVec,        // all observations
+		radarKdTree,     // nearest nbr tree for pointVec
+		cellMat);
+
+      
     printRunTime("calcAllVU", &timea);
 
     // Run low-pass filtering if requested
 
-    Filter *filter = FilterFactory::createFilter(uvFilter);
+    Filter *filter = FilterFactory::createFilter(uvFilter);		// TOD indices
     if (filter != NULL) {
       filter->filter_U(cellMat, nradx, nrady, nradz, 1, NULL);
       filter->filter_V(cellMat, nradx, nrady, nradz, 1, NULL);
@@ -89,14 +98,19 @@ bool Fractl::calcWinds()
     //printRunTime("interpMissing for V,U", &timea);
 
     // Based on u, v, calc w
-    calcAllW(cellMat);
+
+    if (gridType == Params::GRID_MISH)    
+      calcAllWOnMish(cellMat);
+    else
+      calcAllW(cellMat);
+    
     printRunTime("calcAllW", &timea);
 
     // Run low-pass filtering on W if requested
 
     filter = FilterFactory::createFilter(wFilter);
     if (filter != NULL) {
-      filter->filter_W(cellMat, nradx, nrady, nradz, 1, NULL);
+      filter->filter_W(cellMat, nradx, nrady, nradz, 1, NULL);  // TODO indices
       delete filter;
     }
 
@@ -113,10 +127,10 @@ bool Fractl::calcWinds()
 // Calculate V and U winds at all cells in the z,y,x grid.
 
 void Fractl::calcAllVU(
-  long numNbrMax,              // max num nearest nbrs
-  vector<Point *> *pointVec,   // all observations
-  KD_tree * radarKdTree,       // nearest nbr tree for pointVec
-  Cell ***& cellMat)           // we set Cell.uu, vv
+		       long numNbrMax,              // max num nearest nbrs
+		       vector<Point *> *pointVec,   // all observations
+		       KD_tree * radarKdTree,       // nearest nbr tree for pointVec
+		       Cell ***& cellMat)           // we set Cell.uu, vv
 {
 
   KD_real * centerLoc = new KD_real[ndim];
@@ -133,43 +147,43 @@ void Fractl::calcAllVU(
         if (bugs >= Params::DEBUG_NORM) {
           cout << setprecision(5);
           cout << endl << "calcAllVU: iz: " << iz
-            << "  iy: " << iy
-            << "  ix: " << ix
-            << "  z: " << centerLoc[0]
-            << "  y: " << centerLoc[1]
-            << "  x: " << centerLoc[2]
-            << endl;
+	       << "  iy: " << iy
+	       << "  ix: " << ix
+	       << "  z: " << centerLoc[0]
+	       << "  y: " << centerLoc[1]
+	       << "  x: " << centerLoc[2]
+	       << endl;
         }
 
         Cell * pcell = & cellMat[iz][iy][ix];
         calcCellVU(
-          centerLoc,             // query point
-          numNbrMax,             // max num nearest nbrs
-          pointVec,              // all observations
-          radarKdTree,           // nearest nbr tree for pointVec
-          pcell);                 // Cell.vv, uu are set.
+		   centerLoc,             // query point
+		   numNbrMax,             // max num nearest nbrs
+		   pointVec,              // all observations
+		   radarKdTree,           // nearest nbr tree for pointVec
+		   pcell);                 // Cell.vv, uu are set.
 
         bool ok = false;
         if (isOkDouble( pcell->vv)
-          && isOkDouble( pcell->uu))
-        {
-          ok = true;
-	  okCount++;
-        }
+	    && isOkDouble( pcell->uu))
+	  {
+	    ok = true;
+	    okCount++;
+	  }
 
         if (bugs >= Params::DEBUG_VERBOSE) {
           cout << setprecision(7);
           cout << "calcAllVU: ok:" << ok
-            << "  iz: " << iz
-            << "  iy: " << iy
-            << "  ix: " << ix
-            << "  loc:"
-            << "  " << centerLoc[0]
-            << "  " << centerLoc[1]
-            << "  " << centerLoc[2]
-            << "  W: " << cellMat[iz][iy][ix].ww
-            << "  V: " << cellMat[iz][iy][ix].vv
-            << "  U: " << cellMat[iz][iy][ix].uu << endl;
+	       << "  iz: " << iz
+	       << "  iy: " << iy
+	       << "  ix: " << ix
+	       << "  loc:"
+	       << "  " << centerLoc[0]
+	       << "  " << centerLoc[1]
+	       << "  " << centerLoc[2]
+	       << "  W: " << cellMat[iz][iy][ix].ww
+	       << "  V: " << cellMat[iz][iy][ix].vv
+	       << "  U: " << cellMat[iz][iy][ix].uu << endl;
         }
 
       } // for ix
@@ -187,6 +201,113 @@ void Fractl::calcAllVU(
   delete[] centerLoc;
 
 } // end calcAllVU
+
+//======================================================================
+
+// Try to calc V and U on the Samurai Mish grid
+
+void Fractl::calcAllVUOnMish(
+			     long numNbrMax,              // max num nearest nbrs
+			     vector<Point *> *pointVec,   // all observations
+			     KD_tree * radarKdTree,       // nearest nbr tree for pointVec
+			     Cell ***& cellMat)           // we set Cell.uu, vv
+{
+
+  KD_real * centerLoc = new KD_real[ndim];
+  long okCount = 0;
+  
+  // for (long iz = 0; iz < nradz; iz++)
+  //   for (long iy = 0; iy < nrady; iy++)
+  //     for (long ix = 0; ix < nradx; ix++)
+
+  //       centerLoc[0] = zgridmin + iz * zgridinc;
+  //       centerLoc[1] = ygridmin + iy * ygridinc;
+  //       centerLoc[2] = xgridmin + ix * xgridinc;
+
+  // This is the way Samurai iterates on the Mish.
+  // *Pos is the position in meter of the observation
+  // i*   is the index of the position in node table
+  
+  for (int ii = -1; ii < (nradx); ii++) {
+    for (int imu = -1; imu <= 1; imu += 2) {
+      double iPos = xgridmin + xgridinc * (ii + (0.5 * sqrt(1. / 3.) * imu + 0.5));
+	    
+      for (int ji = -1; ji < (nrady); ji++) {
+	for (int jmu = -1; jmu <= 1; jmu += 2) {
+	  double jPos = ygridmin + ygridinc * (ji + (0.5 * sqrt(1. / 3.) * jmu + 0.5));
+		
+	  for (int ki = -1; ki < (nradz); ki++) {
+	    for (int kmu = -1; kmu <= 1; kmu += 2) {
+	      double kPos = zgridmin + zgridinc * (ki + (0.5 * sqrt(1. / 3.) * kmu + 0.5));
+	
+	      int ix = (ii + 1) * 2 + (imu + 1) / 2;
+	      int iy = (ji + 1) * 2 + (jmu + 1) / 2;
+	      int iz = (ki + 1) * 2 + (kmu + 1) / 2;
+
+	      // centerLoc[0] = zgridmin + iz * zgridinc;
+	      // centerLoc[1] = ygridmin + iy * ygridinc;
+	      // centerLoc[2] = xgridmin + ix * xgridinc;
+
+	      centerLoc[0] = kPos;
+	      centerLoc[1] = jPos;
+	      centerLoc[2] = iPos;
+  
+	      if (bugs >= Params::DEBUG_NORM) {
+		std::cout << setprecision(5);
+		std::cout << endl << "calcAllVU: iz: " << iz
+			  << "  iy: " << iy
+			  << "  ix: " << ix
+			  << "  z: " << centerLoc[0]
+			  << "  y: " << centerLoc[1]
+			  << "  x: " << centerLoc[2]
+			  << endl;
+	      }             
+
+	      Cell * pcell = & cellMat[iz][iy][ix];
+	      calcCellVU(centerLoc,             // query point
+			 numNbrMax,             // max num nearest nbrs
+			 pointVec,              // all observations
+			 radarKdTree,           // nearest nbr tree for pointVec
+			 pcell);                 // Cell.vv, uu are set.
+
+	      bool ok = false;
+	      if (isOkDouble( pcell->vv) && isOkDouble( pcell->uu)) {
+		ok = true;
+		okCount++;
+	      }
+
+	      if (bugs >= Params::DEBUG_VERBOSE) {
+		cout << setprecision(7);
+		cout << "calcAllVU: ok:" << ok
+		     << "  iz: " << iz
+		     << "  iy: " << iy
+		     << "  ix: " << ix
+		     << "  loc:"
+		     << "  " << centerLoc[0]
+		     << "  " << centerLoc[1]
+		     << "  " << centerLoc[2]
+		     << "  W: " << cellMat[iz][iy][ix].ww
+		     << "  V: " << cellMat[iz][iy][ix].vv
+		     << "  U: " << cellMat[iz][iy][ix].uu << endl;
+	      }
+	    } 
+	  } // ki
+	}
+      } // ji
+    }
+  }  // ii
+	
+  cout << "---------------- okCount: " << okCount << endl;
+
+  cout << "sumTimea: " << sumTimea << endl;
+  cout << "cntTimeb: " << cntTimeb << "  sumTimeb: " << sumTimeb << endl;
+  cout << "sumTimec: " << sumTimec << endl;
+  cout << "sumTimee: " << sumTimee << endl;
+  cout << "sumTimef: " << sumTimef << endl;
+
+  delete[] centerLoc;
+
+} // end calcAllVUOnMish
 
 
 //======================================================================
@@ -233,11 +354,11 @@ void Fractl::calcAllVU(
 // vy_hat = ( (sumyr - vz sumyz) sumxx - (sumxr - vz sumxz) sumxy ) / denom
 
 void Fractl::calcCellVU(
-  KD_real * centerLoc,           // query point: z, y, x
-  long numNbrMax,                // max num nearest nbrs
-  vector<Point *> *pointVec,     // all observations
-  KD_tree * radarKdTree,         // nearest nbr tree for pointVec
-  Cell * pcell)                  // we fill vv, uu.
+			KD_real * centerLoc,           // query point: z, y, x
+			long numNbrMax,                // max num nearest nbrs
+			vector<Point *> *pointVec,     // all observations
+			KD_tree * radarKdTree,         // nearest nbr tree for pointVec
+			Cell * pcell)                  // we fill vv, uu.
 {
   struct timeval timea;
   addDeltaTime( &timea, NULL);
@@ -246,11 +367,11 @@ void Fractl::calcCellVU(
   pcell->vv = numeric_limits<double>::quiet_NaN();
 
   bool showDetail = testDetail(
-    centerLoc[0],         // z
-    centerLoc[1],         // y
-    centerLoc[2]);        // x
+			       centerLoc[0],         // z
+			       centerLoc[1],         // y
+			       centerLoc[2]);        // x
 
-  if (bugs >= Params::DEBUG_EXTRA || showDetail) {
+  if (bugs >= Params::DEBUG_EXTRA && showDetail) {
     cout << setprecision(7);
     cout << "calcCellVU.entry: showDetail:" << endl;
     cout << "    centerLoc: z: " << centerLoc[0] << endl;
@@ -289,23 +410,23 @@ void Fractl::calcCellVU(
 
   // Find nearest nbrs
   radarKdTree->nnquery(
-    centerLoc,        // query point
-    numNbrMax,        // desired num nearest nbrs
-    KD_EUCLIDEAN,     // Metric
-    1,                // MinkP
-    nbrIxs,           // out: parallel array, indices of nearest nbrs
-    nbrDistSqs);      // out: parallel array, squares of distances of nbrs
+		       centerLoc,        // query point
+		       numNbrMax,        // desired num nearest nbrs
+		       KD_EUCLIDEAN,     // Metric
+		       1,                // MinkP
+		       nbrIxs,           // out: parallel array, indices of nearest nbrs
+		       nbrDistSqs);      // out: parallel array, squares of distances of nbrs
 
   cntTimeb++;
   addDeltaTime( &timeb, &sumTimeb);
   struct timeval timec;
   addDeltaTime( &timec, NULL);
 
-  if (bugs >= Params::DEBUG_VERBOSE || showDetail) {
+  if (bugs >= Params::DEBUG_VERBOSE && showDetail) {
     cout << setprecision(7);
     cout << "  calcCellVU: showDetail:  nearPts for centerLoc: z: "
-      << centerLoc[0] << "  y: " << centerLoc[1]
-      << "  x: " << centerLoc[2] << endl;
+	 << centerLoc[0] << "  y: " << centerLoc[1]
+	 << "  x: " << centerLoc[2] << endl;
   }
 
   int numNbrActual = 0;
@@ -321,7 +442,7 @@ void Fractl::calcCellVU(
     double maxDist = maxDistBase + maxDistFactor * aircraftDist;
 
     // Use local distance constraint from grid point center
-    double roi = sqrt(xgridinc  *xgridinc + ygridinc * ygridinc + zgridinc * zgridinc);
+    double roi = sqrt(xgridinc * xgridinc + ygridinc * ygridinc + zgridinc * zgridinc);
     if (roi < maxDist) maxDist = roi;
 
     const char * msg;
@@ -340,25 +461,25 @@ void Fractl::calcCellVU(
       msg = "OMIT";
     }
 
-    if (bugs >= Params::DEBUG_VERBOSE || showDetail) {
-    cout << setprecision(5);
-    cout << "    " << msg
-      << "  inbr: " << inbr
-      << "  dist: " << localDist
-      << "  pt:"
-      << "  coordz: " << nearPt->coordz
-      << "  coordy: " << nearPt->coordy
-      << "  coordx: " << nearPt->coordx
-      << "  vg: " << nearPt->vg
-      << endl;
+    if (bugs >= Params::DEBUG_VERBOSE && showDetail) {
+      cout << setprecision(5);
+      cout << "    " << msg
+	   << "  inbr: " << inbr
+	   << "  dist: " << localDist
+	   << "  pt:"
+	   << "  coordz: " << nearPt->coordz
+	   << "  coordy: " << nearPt->coordy
+	   << "  coordx: " << nearPt->coordx
+	   << "  vg: " << nearPt->vg
+	   << endl;
     }
 
   } // for inbr
 
-  if (bugs >= Params::DEBUG_EXTRA || showDetail) {
+  if (bugs >= Params::DEBUG_EXTRA && showDetail) {
     cout << "  calcCellVU: showDetail: cell z: "
-      << centerLoc[0] << "  y: " << centerLoc[1]
-      << "  x: " << centerLoc[2] << "  numNbrActual: " << numNbrActual << endl;
+	 << centerLoc[0] << "  y: " << centerLoc[1]
+	 << "  x: " << centerLoc[2] << "  numNbrActual: " << numNbrActual << endl;
   }
 
   if (numNbrActual >= 2) {    // if numNbrActual is ok
@@ -369,28 +490,28 @@ void Fractl::calcCellVU(
     pcell->meanNbrKeepDist = nbrKeepDistStat.dsum / nbrKeepDistStat.numGood;
     pcell->meanNbrOmitDist = nbrOmitDistStat.dsum / nbrOmitDistStat.numGood;
 
-    if (bugs >= Params::DEBUG_EXTRA || showDetail) {
+    if (bugs >= Params::DEBUG_EXTRA && showDetail) {
       for (long inbr = 0; inbr < numNbrActual; inbr++) {
-        Point * pt = nearPts[inbr];
-        cout << setprecision(7);
-        cout << "  calcCellVU: showDetail: nbr: inbr: " << inbr
-          << "  vg: " << pt->vg
-          << "  dbz: " << pt->dbz
-          << "  ncp: " << pt->ncp
-          << "  theta deg: " << (pt->thetaRad * 180 / M_PI)
-          << "  elev deg: " << (pt->elevRad * 180 / M_PI)
-          << setprecision(15)
-          << "  deltaTime: "
-          << (pt->rayTime - nearPts[0]->rayTime)
-          << endl;
+	Point * pt = nearPts[inbr];
+	cout << setprecision(7);
+	cout << "  calcCellVU: showDetail: nbr: inbr: " << inbr
+	     << "  vg: " << pt->vg
+	     << "  dbz: " << pt->dbz
+	     << "  ncp: " << pt->ncp
+	     << "  theta deg: " << (pt->thetaRad * 180 / M_PI)
+	     << "  elev deg: " << (pt->elevRad * 180 / M_PI)
+	     << setprecision(15)
+	     << "  deltaTime: "
+	     << (pt->rayTime - nearPts[0]->rayTime)
+	     << endl;
       }
       for (long inbr = 0; inbr < numNbrActual; inbr++) {
-        Point * pt = nearPts[inbr];
-        cout << "  showDetail.from.aircraft.to.nbr: set arrow "
-          << (inbr + 1)
-          << " from " << pt->aircraftx << "," << pt->aircrafty
-          << " to " << pt->coordx << "," << pt->coordy
-          << endl;
+	Point * pt = nearPts[inbr];
+	cout << "  showDetail.from.aircraft.to.nbr: set arrow "
+	     << (inbr + 1)
+	     << " from " << pt->aircraftx << "," << pt->aircrafty
+	     << " to " << pt->coordx << "," << pt->coordy
+	     << endl;
       }
     } // if showDetail
 
@@ -419,22 +540,22 @@ void Fractl::calcCellVU(
       Eigen::VectorXd bvec( numNbrActual);
 
       for (long inbr = 0; inbr < numNbrActual; inbr++) {
-        Point * pt = nearPts[inbr];
-        amat( inbr, 0) = cos( pt->thetaRad) * cos( pt->elevRad);
-        amat( inbr, 1) = sin( pt->thetaRad) * cos( pt->elevRad);
+	Point * pt = nearPts[inbr];
+	amat( inbr, 0) = cos( pt->thetaRad) * cos( pt->elevRad);
+	amat( inbr, 1) = sin( pt->thetaRad) * cos( pt->elevRad);
 
-        // Find wwind = W wind estimate near the pt.
-        double wwind = pcell->ww;
+	// Find wwind = W wind estimate near the pt.
+	double wwind = pcell->ww;
 
-        bvec( inbr) = pt->vg - wwind * sin( pt->elevRad);
+	bvec( inbr) = pt->vg - wwind * sin( pt->elevRad);
       }
-      if (bugs >= Params::DEBUG_EXTRA || showDetail) {
-        cout << "\n  calcCellVU: eigen: amat:\n" << amat << endl;
-        cout << "\n  calcCellVU: eigen: bvec:\n" << bvec << endl;
+      if (bugs >= Params::DEBUG_EXTRA && showDetail) {
+	cout << "\n  calcCellVU: eigen: amat:\n" << amat << endl;
+	cout << "\n  calcCellVU: eigen: bvec:\n" << bvec << endl;
       }
 
       Eigen::JacobiSVD<Eigen::MatrixXd> svd(
-        amat, Eigen::ComputeThinU | Eigen::ComputeThinV);
+					    amat, Eigen::ComputeThinU | Eigen::ComputeThinV);
       Eigen::VectorXd singVals = svd.singularValues();
       Eigen::MatrixXd thinV = svd.matrixV();
       long slen = singVals.size();
@@ -442,14 +563,14 @@ void Fractl::calcCellVU(
 
       pcell->conditionNumber = numeric_limits<double>::infinity();
       if (slen > 0 && singVals[slen-1] != 0)
-        pcell->conditionNumber = singVals[0] / singVals[slen-1];
+	pcell->conditionNumber = singVals[0] / singVals[slen-1];
 
-      if (bugs >= Params::DEBUG_EXTRA || showDetail) {
-        cout << "\n  calcCellVU: eigen: singVals:\n" << singVals << endl;
-        cout << "\n  calcCellVU: num nonzeroSingularValues:\n"
-          << svd.nonzeroSingularValues() << endl;
-        cout << "  calcCellVU: conditionNumber: "
-          << pcell->conditionNumber << endl;
+      if (bugs >= Params::DEBUG_EXTRA && showDetail) {
+	cout << "\n  calcCellVU: eigen: singVals:\n" << singVals << endl;
+	cout << "\n  calcCellVU: num nonzeroSingularValues:\n"
+	     << svd.nonzeroSingularValues() << endl;
+	cout << "  calcCellVU: conditionNumber: "
+	     << pcell->conditionNumber << endl;
       }
 
       // Using a conditionNumberCutoff > 10 causes some cells
@@ -458,26 +579,26 @@ void Fractl::calcCellVU(
       if (pcell->conditionNumber < conditionNumberCutoff)
 	isCellOk = true;
       if (isCellOk) {
-        Eigen::VectorXd xvec = svd.solve( bvec);
-        Eigen::VectorXd errvec = amat * xvec - bvec;
-        double maxAbsErr = errvec.array().abs().maxCoeff();
-        double meanSqErr = errvec.dot( errvec) / numNbrActual;   // dot product
+	Eigen::VectorXd xvec = svd.solve( bvec);
+	Eigen::VectorXd errvec = amat * xvec - bvec;
+	double maxAbsErr = errvec.array().abs().maxCoeff();
+	double meanSqErr = errvec.dot( errvec) / numNbrActual;   // dot product
 
-        pcell->vv = xvec(1);       // v
-        pcell->uu = xvec(0);       // u
+	pcell->vv = xvec(1);       // v
+	pcell->uu = xvec(0);       // u
 
-        double ustd = 0;
-        double vstd = 0;
+	double ustd = 0;
+	double vstd = 0;
 	
-        for (long s = 0; s < slen; s++) {
-          double thin0 = thinV(0, s);
-          double thin1 = thinV(1, s);
-          double sing = singVals[s];
-          ustd += pow( (thinV(s, 0) / singVals[s]) , 2.0);
-          vstd += pow( (thinV(s, 1) / singVals[s]) , 2.0);
-        }
-        pcell->ustd = sqrt(ustd);
-        pcell->vstd = sqrt(vstd);
+	for (long s = 0; s < slen; s++) {
+	  double thin0 = thinV(0, s);
+	  double thin1 = thinV(1, s);
+	  double sing = singVals[s];
+	  ustd += pow( (thinV(s, 0) / singVals[s]) , 2.0);
+	  vstd += pow( (thinV(s, 1) / singVals[s]) , 2.0);
+	}
+	pcell->ustd = sqrt(ustd);
+	pcell->vstd = sqrt(vstd);
       } // if isCellOk
     } // if useEigen
 
@@ -491,31 +612,31 @@ void Fractl::calcCellVU(
       double syz = 0;
 
       for (long inbr = 0; inbr < numNbrActual; inbr++) {
-        Point * pt = nearPts[inbr];
-        double xval = cos( pt->thetaRad) * cos( pt->elevRad);
-        double yval = sin( pt->thetaRad) * cos( pt->elevRad);
-        double zval = pt->vg - wwind * sin( pt->elevRad);
+	Point * pt = nearPts[inbr];
+	double xval = cos( pt->thetaRad) * cos( pt->elevRad);
+	double yval = sin( pt->thetaRad) * cos( pt->elevRad);
+	double zval = pt->vg - wwind * sin( pt->elevRad);
 
-        sxx += xval * xval;
-        sxy += xval * yval;
-        syy += yval * yval;
-        sxz += xval * zval;
-        syz += yval * zval;
+	sxx += xval * xval;
+	sxy += xval * yval;
+	syy += yval * yval;
+	sxz += xval * zval;
+	syz += yval * zval;
       }
       double detbase = sxx*syy - sxy*sxy;
       double det1    = sxz*syy - syz*sxy;
       double det2    = sxx*syz - sxy*sxz;
-      if (bugs >= Params::DEBUG_EXTRA || showDetail) {
-        cout << "  calcCellVU: cramer: showDetail: "
-          << "  sxx: " << sxx
-          << "  sxy: " << sxy
-          << "  syy: " << syy
-          << "  sxz: " << sxz
-          << "  syz: " << syz << endl;
-        cout << "  calcCellVU: cramer: showDetail: "
-          << "  detbase: " << detbase
-          << "  det1: " << det1
-          << "  det2: " << det2 << endl;
+      if (bugs >= Params::DEBUG_EXTRA && showDetail) {
+	cout << "  calcCellVU: cramer: showDetail: "
+	     << "  sxx: " << sxx
+	     << "  sxy: " << sxy
+	     << "  syy: " << syy
+	     << "  sxz: " << sxz
+	     << "  syz: " << syz << endl;
+	cout << "  calcCellVU: cramer: showDetail: "
+	     << "  detbase: " << detbase
+	     << "  det1: " << det1
+	     << "  det2: " << det2 << endl;
       }
 
       // Using a detCutoff <= 0.01 causes some cells
@@ -525,18 +646,19 @@ void Fractl::calcCellVU(
       double detCutoff = 0.1;    // xxxxxxxxx
 
       if (fabs(detbase) > detCutoff) {
-        pcell->uu = det1 / detbase;
-        pcell->vv = det2 / detbase;
+	pcell->uu = det1 / detbase;
+	pcell->vv = det2 / detbase;
       }
     }
 
     addDeltaTime( &timee, &sumTimee);
+    delete[] nearPts;
   } // else numNbrActual is ok
 
   struct timeval timef;
   addDeltaTime( &timef, NULL);
 
-  if (bugs >= Params::DEBUG_EXTRA || showDetail) {
+  if (bugs >= Params::DEBUG_EXTRA && showDetail) {
     cout << setprecision(7);
     cout << "calcCellVU.exit: showDetail:" << endl;
     cout << "    centerLoc: z: " << centerLoc[0] << endl;
@@ -616,8 +738,143 @@ void Fractl::calcCellVU(
 //   totalFlow = 2 * sum_iz (density[iz] * H * wgt[iz])
 //   H = totalFlow / (2 * sum_iz (density[iz] * wgt[iz]))
 
+void Fractl::calcAllWOnMish(
+		      Cell ***& cellMat)           // We set Cell.ww
+{
+  long maxx = (xgridmax - xgridmin) * 2 / xgridinc + 1;
+  long maxy = (ygridmax - ygridmin) * 2 / ygridinc + 1;  
+  long maxz = (zgridmax - zgridmin) * 2 / zgridinc + 1;
+  
+  double * density = new double[maxz + 3];	 // range is 0..maxz
+  double * wgts = new double[maxz + 3];
+  
+  // double * density = new double[nradz];
+  // double * wgts = new double[nradz];
+  
+  //  for (long iz = 0; iz < nradz; iz++)
+  //    density[iz] = calcDensity( zgridmin + iz * zgridinc);
+
+  // Use samurai index computation since we need both position and index
+  
+  for (int ki = -1; ki < (nradz); ki++) {
+    for (int kmu = -1; kmu <= 1; kmu += 2) {
+      double kPos = zgridmin + zgridinc * (ki + (0.5 * sqrt(1. / 3.) * kmu + 0.5));
+      int ik = (ki + 1) * 2 + (kmu + 1) / 2;
+      density[ik] = calcDensity(kPos);
+    }
+  }
+
+  // Omit the edges of the region as we use ix-1, ix+1, iy-1, iy+1.
+  
+  // for (long iy = 1; iy < nrady - 1; iy++)
+  //   for (long ix = 1; ix < nradx - 1; ix++)
+
+  for (long iy = 1; iy < maxy - 1; iy++) {
+    for (long ix = 1; ix < maxx - 1; ix++) {
+
+      // for (long iz = 0; iz < nradz; iz++)
+      for (long iz = 0; iz < maxz; iz++) {
+        // xxx Future:
+        // Find c = the nearest cell to this one
+        // through which the aircraft flew.
+        // Let cosElev = horizDistToC / slantDistToC
+        // wgt = cosElev
+
+        wgts[iz] = 1.0;
+      }
+
+      // Calc totalFlow = sum of everything flowing into the column,
+      // not counting the top or bottom faces.
+
+      double totalFlow = 0;
+      double sumWgt = 0;
+
+      // for (long iz = 0; iz < nradz; iz++)
+      for (long iz = 0; iz < maxz; iz++) {
+	
+        if ( isOkDouble( cellMat[iz][iy][ix-1].uu)
+	     && isOkDouble( cellMat[iz][iy][ix+1].uu)
+	     && isOkDouble( cellMat[iz][iy-1][ix].vv)
+	     && isOkDouble( cellMat[iz][iy+1][ix].vv))
+	  {
+	    totalFlow += density[iz] * 0.5
+	      * ( cellMat[iz][iy][ix-1].uu - cellMat[iz][iy][ix+1].uu
+		  +  cellMat[iz][iy-1][ix].vv - cellMat[iz][iy+1][ix].vv);
+	    sumWgt += density[iz] * wgts[iz];
+	  }
+      } // for iz
+
+      double hcon;
+      if (fabs(sumWgt) < epsilon) hcon = 0;
+      else hcon = totalFlow / (2 * sumWgt);
+
+      // Calc W wind = totalFlow, starting at the bottom,
+      // using the modified U, V winds.
+      double wwind = baseW;
+      // for (long iz = 0; iz < nradz; iz++)
+      for (long iz = 0; iz < maxz; iz++) {
+        if ( isOkDouble( cellMat[iz][iy][ix-1].uu)
+	     && isOkDouble( cellMat[iz][iy][ix+1].uu)
+	     && isOkDouble( cellMat[iz][iy-1][ix].vv)
+	     && isOkDouble( cellMat[iz][iy+1][ix].vv))
+	  {
+	    wwind += density[iz] * 0.5
+	      * (  cellMat[iz][iy][ix-1].uu - cellMat[iz][iy][ix+1].uu
+		   + cellMat[iz][iy-1][ix].vv - cellMat[iz][iy+1][ix].vv
+		   - 4 * hcon * wgts[iz]);
+	    if (! isOkDouble( wwind))
+	      throwerr("calcAllW: invalid w wind");
+	    cellMat[iz][iy][ix].ww = wwind;
+	  } else cellMat[iz][iy][ix].ww = numeric_limits<double>::quiet_NaN();
+      } // for iz
+      if (fabs(wwind - baseW) > epsilon) {
+        cout << setprecision(15);
+        cout << "calcAllW: iy: " << iy << "  ix: " << ix
+	     << "  baseW: " << baseW << "  wwind: " << wwind << endl;
+        cout.flush();
+        throwerr("wwind error");
+      }
+    } // for ix
+  } // for iy
+
+  //xxx maybe omit:
+  // We only calculated the inner points for iy, ix.
+  // But we also will need the edge values when
+  // we calc the next iteration of U, V values.
+  // So set the edges from the nearest interior points.
+  // May be NaN.
+
+  // for (long iz = 0; iz < nradz; iz++)
+  for (long iz = 0; iz < maxz; iz++) {
+    // Corners
+    cellMat[iz][0][0].ww             = cellMat[iz][1][1].ww;
+    cellMat[iz][0][maxx-1].ww       = cellMat[iz][1][maxx-2].ww;
+    cellMat[iz][maxy-1][0].ww       = cellMat[iz][maxy-2][1].ww;
+    cellMat[iz][maxy-1][maxx-1].ww = cellMat[iz][maxy-2][maxx-2].ww;
+
+    // Side edges
+    // for (long iy = 1; iy < nrady - 1; iy++)
+    for (long iy = 1; iy < maxy - 1; iy++) {    
+      cellMat[iz][iy][0].ww       = cellMat[iz][iy][1].ww;
+      cellMat[iz][iy][maxx-1].ww = cellMat[iz][iy][maxx-2].ww;
+    }
+    // Top and bottom edges
+    // for (long ix = 1; ix < nradx - 1; ix++)
+    for (long ix = 1; ix < maxx - 1; ix++) {
+      cellMat[iz][0][ix].ww       = cellMat[iz][1][ix].ww;
+      cellMat[iz][maxy-1][ix].ww = cellMat[iz][maxy-2][ix].ww;
+    }
+  } // for iz
+
+  delete[] density;
+  delete[] wgts;
+
+} // end calcAllWOnMish
+
+//==================================================================
+
 void Fractl::calcAllW(
-  Cell ***& cellMat)           // We set Cell.ww
+		      Cell ***& cellMat)           // We set Cell.ww
 {
   double * density = new double[nradz];
   double * wgts = new double[nradz];
@@ -646,35 +903,35 @@ void Fractl::calcAllW(
 
       for (long iz = 0; iz < nradz; iz++) {
         if ( isOkDouble( cellMat[iz][iy][ix-1].uu)
-          && isOkDouble( cellMat[iz][iy][ix+1].uu)
-          && isOkDouble( cellMat[iz][iy-1][ix].vv)
-          && isOkDouble( cellMat[iz][iy+1][ix].vv))
-        {
-          totalFlow += density[iz] * 0.5
-            * ( cellMat[iz][iy][ix-1].uu - cellMat[iz][iy][ix+1].uu
-             +  cellMat[iz][iy-1][ix].vv - cellMat[iz][iy+1][ix].vv);
-          sumWgt += density[iz] * wgts[iz];
+	     && isOkDouble( cellMat[iz][iy][ix+1].uu)
+	     && isOkDouble( cellMat[iz][iy-1][ix].vv)
+	     && isOkDouble( cellMat[iz][iy+1][ix].vv))
+	  {
+	    totalFlow += density[iz] * 0.5
+	      * ( cellMat[iz][iy][ix-1].uu - cellMat[iz][iy][ix+1].uu
+		  +  cellMat[iz][iy-1][ix].vv - cellMat[iz][iy+1][ix].vv);
+	    sumWgt += density[iz] * wgts[iz];
 
-          bool showDetail = testDetail(
-            zgridmin + iz * zgridinc,      // z
-            ygridmin + iy * ygridinc,      // y
-            xgridmin + ix * xgridinc);      // x
-	  // detailSpec);                   // z, y, x, delta
+	    bool showDetail = testDetail(
+					 zgridmin + iz * zgridinc,      // z
+					 ygridmin + iy * ygridinc,      // y
+					 xgridmin + ix * xgridinc);      // x
+	    // detailSpec);                   // z, y, x, delta
 
-          if (showDetail) {
-            cout << setprecision(7);
-            cout << "calcAllW: showDetail:" << endl
-              << "    iz: " << iz << endl
-              << "    iy: " << iy << endl
-              << "    ix: " << ix << endl
-              << "    den: " << density[iz] << endl
-              << "    wgt: " << wgts[iz] << endl
-              << "    U-: " << cellMat[iz][iy][ix-1].uu << endl
-              << "    U+: " << cellMat[iz][iy][ix+1].uu << endl
-              << "    V-: " << cellMat[iz][iy-1][ix].vv << endl
-              << "    V+: " << cellMat[iz][iy+1][ix].vv << endl;
-          }
-        }
+	    if (showDetail) {
+	      cout << setprecision(7);
+	      cout << "calcAllW: showDetail:" << endl
+		   << "    iz: " << iz << endl
+		   << "    iy: " << iy << endl
+		   << "    ix: " << ix << endl
+		   << "    den: " << density[iz] << endl
+		   << "    wgt: " << wgts[iz] << endl
+		   << "    U-: " << cellMat[iz][iy][ix-1].uu << endl
+		   << "    U+: " << cellMat[iz][iy][ix+1].uu << endl
+		   << "    V-: " << cellMat[iz][iy-1][ix].vv << endl
+		   << "    V+: " << cellMat[iz][iy+1][ix].vv << endl;
+	    }
+	  }
       } // for iz
 
       double hcon;
@@ -686,46 +943,46 @@ void Fractl::calcAllW(
       double wwind = baseW;
       for (long iz = 0; iz < nradz; iz++) {
         if ( isOkDouble( cellMat[iz][iy][ix-1].uu)
-          && isOkDouble( cellMat[iz][iy][ix+1].uu)
-          && isOkDouble( cellMat[iz][iy-1][ix].vv)
-          && isOkDouble( cellMat[iz][iy+1][ix].vv))
-        {
-          wwind += density[iz] * 0.5
-            * (  cellMat[iz][iy][ix-1].uu - cellMat[iz][iy][ix+1].uu
-               + cellMat[iz][iy-1][ix].vv - cellMat[iz][iy+1][ix].vv
-               - 4 * hcon * wgts[iz]);
-          if (! isOkDouble( wwind))
-            throwerr("calcAllW: invalid w wind");
-          cellMat[iz][iy][ix].ww = wwind;
+	     && isOkDouble( cellMat[iz][iy][ix+1].uu)
+	     && isOkDouble( cellMat[iz][iy-1][ix].vv)
+	     && isOkDouble( cellMat[iz][iy+1][ix].vv))
+	  {
+	    wwind += density[iz] * 0.5
+	      * (  cellMat[iz][iy][ix-1].uu - cellMat[iz][iy][ix+1].uu
+		   + cellMat[iz][iy-1][ix].vv - cellMat[iz][iy+1][ix].vv
+		   - 4 * hcon * wgts[iz]);
+	    if (! isOkDouble( wwind))
+	      throwerr("calcAllW: invalid w wind");
+	    cellMat[iz][iy][ix].ww = wwind;
 
-          bool showDetail = testDetail(
-            zgridmin + iz * zgridinc,      // z
-            ygridmin + iy * ygridinc,      // y
-            xgridmin + ix * xgridinc);      // x
+	    bool showDetail = testDetail(
+					 zgridmin + iz * zgridinc,      // z
+					 ygridmin + iy * ygridinc,      // y
+					 xgridmin + ix * xgridinc);      // x
 
-          if (showDetail) {
-            cout << setprecision(7);
-            cout << "calcAllW: showDetail:" << endl
-              << "  iz: " << iz << endl
-              << "  iy: " << iy << endl
-              << "  ix: " << ix << endl
-              << "  den: " << density[iz] << endl
-              << "  U-: " << cellMat[iz][iy][ix-1].uu << endl
-              << "  U+: " << cellMat[iz][iy][ix+1].uu << endl
-              << "  V-: " << cellMat[iz][iy-1][ix].vv << endl
-              << "  V+: " << cellMat[iz][iy+1][ix].vv << endl
-              << "  hcon: " << hcon << endl
-              << "  wgt: " << wgts[iz] << endl
-              << "  con: " << (4 * hcon * wgts[iz]) << endl
-              << "  wwind: " << wwind << endl;
-          }
-        }
+	    if (showDetail) {
+	      cout << setprecision(7);
+	      cout << "calcAllW: showDetail:" << endl
+		   << "  iz: " << iz << endl
+		   << "  iy: " << iy << endl
+		   << "  ix: " << ix << endl
+		   << "  den: " << density[iz] << endl
+		   << "  U-: " << cellMat[iz][iy][ix-1].uu << endl
+		   << "  U+: " << cellMat[iz][iy][ix+1].uu << endl
+		   << "  V-: " << cellMat[iz][iy-1][ix].vv << endl
+		   << "  V+: " << cellMat[iz][iy+1][ix].vv << endl
+		   << "  hcon: " << hcon << endl
+		   << "  wgt: " << wgts[iz] << endl
+		   << "  con: " << (4 * hcon * wgts[iz]) << endl
+		   << "  wwind: " << wwind << endl;
+	    }
+	  }
         else cellMat[iz][iy][ix].ww = numeric_limits<double>::quiet_NaN();
       } // for iz
       if (fabs(wwind - baseW) > epsilon) {
         cout << setprecision(15);
         cout << "calcAllW: iy: " << iy << "  ix: " << ix
-          << "  baseW: " << baseW << "  wwind: " << wwind << endl;
+	     << "  baseW: " << baseW << "  wwind: " << wwind << endl;
         cout.flush();
         throwerr("wwind error");
       }
@@ -733,7 +990,7 @@ void Fractl::calcAllW(
   } // for iy
 
 
-//xxx maybe omit:
+  //xxx maybe omit:
   // We only calculated the inner points for iy, ix.
   // But we also will need the edge values when
   // we calc the next iteration of U, V values.
@@ -762,7 +1019,7 @@ void Fractl::calcAllW(
   delete[] density;
   delete[] wgts;
 
-} // end calcAllW
+} // end calcAllWOnMish
 
 //==================================================================
 
