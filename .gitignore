@@ -1,11 +1,15 @@
 *.o
 *~
-run_cmake
-doit
+*.log
 Params.cc
 Params.hh
 CMakeFiles
 CMakeCache.txt
 Fractl
+Makefile
+build
+hide
+cmake_install.cmake
+
 
 
