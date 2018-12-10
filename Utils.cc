@@ -20,9 +20,9 @@ void array2cell_U(Cell *** &cellMat, int xdim, int ydim, int zdim, double *data)
 
   // Put data back into cell matrix
   
-  for(int z = 0; z < z; ++z)  
-    for(int y = 0; y < y; ++y)
-      for(int x = 0; x < x; ++x)
+  for(int z = 0; z < zdim; ++z)  
+    for(int y = 0; y < ydim; ++y)
+      for(int x = 0; x < xdim; ++x)
 	cellMat[z][y][x].uu = 	data[index++];
 }
 

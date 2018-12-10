@@ -41,6 +41,10 @@ bool getTime(NcFile &file, const char *varName, double &time);
 // timeMin and timeMax
 //
 
+// TODO This isn't working yet (need to figure out what to do with
+// needed variables that aren't available in a pre-gridded file.
+// (Radar altitude, NCP, ...)
+
 bool Fractl::readPreGriddedFile(
   long              ifile,
   FileSpec        * fspec,
@@ -126,6 +130,7 @@ bool Fractl::readPreGriddedFile(
     return false;
   }
 #endif
+  radarAlt = -1.0;
   
   // This gets the origin lat and lon (radar location, usually at 0, 0 kilometers)
   
@@ -190,7 +195,7 @@ bool Fractl::readPreGriddedFile(
   
   float ref_fill;
   float vel_fill;
-  float ncp_fill;
+  // float ncp_fill;
 
   if (! getFillValue(reflectivity, ref_fill) ) {
     std::cerr << "Can't get reflectivity fill value from file" << std::endl;
@@ -218,7 +223,7 @@ bool Fractl::readPreGriddedFile(
 
   float *ref = new float[xDim * yDim];
   float *vel = new float[xDim * yDim];
-  float *ncp;
+  // float *ncp;
     
   // Grab the data
 

@@ -438,7 +438,10 @@ void Fractl::readRadarFile(
       // In one test of 237 files, this is called 28766400 times
       // with a total time of 31.8 seconds, or 1.1e-6 seconds per call.
       double latDeg, lonDeg, azi2Deg, m12;
-      double a12 = geodesic->Direct(
+
+      // Not sure if calling Direct has side effect. Commenting out a12 to silence warning
+      // double a12 =
+      geodesic->Direct(
         aircraftLatDeg, aircraftLonDeg,
         aziDeg, 1000 * horizDistKm,
         latDeg, lonDeg, azi2Deg, m12);
@@ -499,10 +502,9 @@ void Fractl::readRadarFile(
 
         // Make sure coordz,y,x are within the grid
         double coordz = altKmMsl;
-        if (
-             (zgridmin==MISS_PARM || coordz >= zgridmin && coordz < zgridmax)
-          && (ygridmin==MISS_PARM || coordy >= ygridmin && coordy < ygridmax)
-          && (xgridmin==MISS_PARM || coordx >= xgridmin && coordx < xgridmax))
+        if (( zgridmin == MISS_PARM || (coordz >= zgridmin && coordz < zgridmax)) &&
+	    ( ygridmin == MISS_PARM || (coordy >= ygridmin && coordy < ygridmax)) &&
+	    ( xgridmin == MISS_PARM || (coordx >= xgridmin && coordx < xgridmax)))
         {
           usePoint = true;
           numGoodPoint++;

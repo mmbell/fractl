@@ -445,8 +445,8 @@ void Fractl::checkVerif(
 
         if (testMode == Params::MODE_ALPHA || testMode == Params::MODE_BETA) {
           // Get verVelW, verVelV, verVelU
-          double synThetaRad = 0;
-          double synElevRad = 0;
+          // double synThetaRad = 0;
+          // double synElevRad = 0;
           calcSyntheticWinds(
             showDetail,
             centerLocZ,         // locz
@@ -758,7 +758,7 @@ void Fractl::calcBeltramiFlow(
             * sin(mc*zz)
           + mc * kc * sin( kc*(xx-ubase*tm))
             * cos(lc * (yy-vbase*tm))*cos(mc*zz));
-
+#if 0
   double dudx = - amp
     * exp( -nu*wavenum*wavenum*tm)
     * ( - wavenum * kc * lc * sin( kc * (xx - ubase*tm))
@@ -773,7 +773,8 @@ void Fractl::calcBeltramiFlow(
         * lc * cos( lc*(yy-vbase*tm)) * sin( mc*zz)
       - mc * lc * kc * sin(kc*(xx-ubase*tm))
         * sin( lc * (yy-vbase*tm)) * cos(mc*zz));
-
+#endif
+  
   double vv = vbase
     + amp
       * exp(-nu * wavenum * wavenum * tm)
@@ -783,29 +784,32 @@ void Fractl::calcBeltramiFlow(
           - mc * lc * cos( kc*(xx-ubase*tm))
             * sin( lc*(yy-vbase*tm))*cos(mc*zz));
 
+#if 0
   double dvdx = amp
     * exp( -nu*wavenum*wavenum*tm)
     * ( wavenum * kc * kc * cos( kc*(xx - ubase*tm))
           * cos( lc*(yy-vbase*tm)) * sin( mc*zz)
         + mc * lc * kc * sin( kc*(xx-ubase*tm))
           * sin( lc * (yy-vbase*tm)) * cos( mc*zz));
-
   double dvdy = amp
     * exp( -nu*wavenum*wavenum*tm)
     * ( -wavenum * kc * lc * sin( kc * (xx - ubase*tm))
       * sin( lc * (yy-vbase*tm)) * sin( mc*zz)
     - mc * lc * lc * cos( kc*(xx-ubase*tm))
       * cos( lc*(yy-vbase*tm)) * cos(mc*zz));
-
+#endif
+  
   double ww = wbase
     * cos( kc*(xx-ubase*tm))
     * cos( lc*(yy-vbase*tm))
     * sin(mc*zz)
     * exp( -nu*wavenum*wavenum*tm);
 
+#if 0
   double vort = 1e5 * (dvdx - dudy);
   double div = 1e5 * (dudx + dvdy);
-
+#endif
+  
   vels[0] = ww;
   vels[1] = vv;
   vels[2] = uu;
@@ -1040,7 +1044,7 @@ string Fractl::formatTime( double dtm)
 
   long ifrac = 1000 * (dtm - itime);
   char bufb[100];
-  snprintf( bufb, 100, "%03d", ifrac);
+  snprintf( bufb, 100, "%03ld", ifrac);
   string stg = bufa;
   stg += ".";
   stg += bufb;
@@ -1338,8 +1342,8 @@ bool Fractl::fillWithObservations()
   vector<FileSpec *>* fsubsetList = new vector<FileSpec *>();
   for (long ifile = 0; ifile < fspecList->size(); ifile++) {
     FileSpec * fspec = fspecList->at( ifile);
-    if (radFiles[0] == 0 && radFiles[1] == 0
-        || ifile >= radFiles[0] && ifile < radFiles[1])
+    if ( (radFiles[0] == 0 && radFiles[1] == 0)
+	 || (ifile >= radFiles[0] && ifile < radFiles[1] ))
       {
         fsubsetList->push_back( fspec);
 	if (bugs >= Params::DEBUG_VERBOSE)
@@ -1520,6 +1524,7 @@ bool Fractl::findLimits()
        << "  xgridmax: " << xgridmax
        << "  xgridinc: " << xgridinc
        << endl;
+  return true;
 }
 
 //==================================================================

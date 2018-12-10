@@ -49,8 +49,8 @@ void addOb(
 {
   numTot++;
   if (std::isnan(val)) numNaN++;
-  else if (std::isinf(val) == -1) numNegInf++;
-  else if (std::isinf(val) == 1) numPosInf++;
+  else if (std::isinf(val) ) numNegInf++;
+  else if (std::isinf(val) ) numPosInf++;
   else {
     numGood++;
     if (std::isnan( dmin) || val < dmin) dmin = val;

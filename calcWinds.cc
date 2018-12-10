@@ -41,7 +41,7 @@ bool Fractl::calcWinds()
   // So the loop limit is hardcoded at 1.
 
   for (int imain = 0; imain < 1; imain++) {
-    bool showStat = true;
+    // bool showStat = true;
     // Based on current w, calc u, v.
     if (gridType == Params::GRID_MISH)
       calcAllVUOnMish(
@@ -559,7 +559,7 @@ void Fractl::calcCellVU(
       Eigen::VectorXd singVals = svd.singularValues();
       Eigen::MatrixXd thinV = svd.matrixV();
       long slen = singVals.size();
-      long vlen = thinV.rows();
+      // long vlen = thinV.rows();
 
       pcell->conditionNumber = numeric_limits<double>::infinity();
       if (slen > 0 && singVals[slen-1] != 0)
@@ -581,19 +581,22 @@ void Fractl::calcCellVU(
       if (isCellOk) {
 	Eigen::VectorXd xvec = svd.solve( bvec);
 	Eigen::VectorXd errvec = amat * xvec - bvec;
-	double maxAbsErr = errvec.array().abs().maxCoeff();
-	double meanSqErr = errvec.dot( errvec) / numNbrActual;   // dot product
+	// double maxAbsErr = errvec.array().abs().maxCoeff();
+	// double meanSqErr = errvec.dot( errvec) / numNbrActual;   // dot product
 
 	pcell->vv = xvec(1);       // v
 	pcell->uu = xvec(0);       // u
 
 	double ustd = 0;
 	double vstd = 0;
-	
+
 	for (long s = 0; s < slen; s++) {
-	  double thin0 = thinV(0, s);
-	  double thin1 = thinV(1, s);
-	  double sing = singVals[s];
+	  // double thin0 = TODO check if the calls to thinV() has side effects
+	  thinV(0, s);
+	  // double thin1 =
+	  thinV(1, s);
+	  // double sing =
+	  singVals[s];
 	  ustd += pow( (thinV(s, 0) / singVals[s]) , 2.0);
 	  vstd += pow( (thinV(s, 1) / singVals[s]) , 2.0);
 	}

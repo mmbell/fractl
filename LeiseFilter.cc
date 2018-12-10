@@ -82,7 +82,11 @@ bool LeiseFilter::filter(double *y, int n1, int n2, int n3,
   i__1 = ndim;
 
   // Default ns values if ns was not passed in
-  int default_ns[ndim] = {0};
+  // int default_ns[ndim] = {0};
+  int default_ns[ndim];
+  for(int i = 0; i < ndim; i++)
+    default_ns[i] = 0;
+  
   if (ns == NULL) {
     ns = default_ns;
   }
