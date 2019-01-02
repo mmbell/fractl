@@ -165,11 +165,13 @@ paramdef string {
 } projName;
 
 paramdef double {
+   p_default = 0.0;
    p_desc = "projection lat0";
    p_help = "For example: 16.5";
 } projLat0;
 
 paramdef double {
+   p_default = 0.0;
    p_desc = "projection lon0";
    p_help = "For example: 148.0";
 } projLon0;
@@ -220,13 +222,15 @@ paramdef int {
 } numNbrMax;
 
 paramdef double {
+   p_default = 0.0;
    p_desc = "Max Dist Base";
-   p_help = "max pt dist = base + factor * aircraftDist";
+   p_help = "max point distance = base + factor * aircraftDist";
 } maxDistBase;
 
 paramdef double {
+   p_default = 0.0;
    p_desc = "Max Dist Factor";
-   p_help = "max pt dist = base + factor * aircraftDist";
+   p_help = "max point distance = base + factor * aircraftDist";
 } maxDistFactor;
 
 commentdef {
@@ -322,7 +326,7 @@ paramdef enum filter_t {
 paramdef int {
   p_default = 1;
   p_desc = "Number of steps for U and V filtering algorithm";
-  p_help = "Applies to all dimensions. Use uvMultiSteps for dimention specific steps";
+  p_help = "Applies to all dimensions. Use uvMultiSteps for dimension specific steps";
 } uvSteps;
 
 paramdef string {
@@ -333,7 +337,7 @@ paramdef string {
 paramdef int {
   p_default = 1;
   p_desc = "Number of steps for W filtering algorithm";
-  p_help = "Applies to all dimensions";
+  p_help = "Applies to all dimensions. Use wMultiStep for dimension specific steps";
 } wSteps;
 
 paramdef string {
