@@ -9,7 +9,7 @@
 //////////////////////////////////////////////////////////
 
 commentdef {
-   p_header = "Fractl calculates U, V, and W wind components from 2 or more doplers, and writes a NetCdf file with the results";
+   p_header = "Fractl calculates U, V, and W wind components from 2 or more Doppler radars, and writes a NetCdf file with the results";
 }
 
 commentdef {
@@ -92,6 +92,7 @@ paramdef enum testmode_t {
 } testMode;
 
 paramdef string {
+  p_default = "0,0";
   p_desc = "radar file filter: start,limit";
   p_help = "Use radar files i: start <= i < limit.\nRead all files if start == limit == 0";
 } radFiles;
@@ -125,17 +126,20 @@ commentdef {
 }
 
 paramdef string {
+   p_default = 0.5;
    p_desc = "Z grid description";
    p_help = "\"min,max,incr\"\n"
      "   To get min and max from the data, specify only the increment\n";
 } zGrid;
 
 paramdef string {
+   p_default = 1.0;
    p_desc = "Y grid description";
    p_help = "\"min,max,incr\" or \"incr\"";
 } yGrid;
 
 paramdef string {
+   p_default = 1.0;
    p_desc = "X grid description";
    p_help = "\"min,max,incr\" or \"incr\"";
 } xGrid;
@@ -192,6 +196,7 @@ paramdef double {
 } baseW;
 
 paramdef double {
+   p_default = 1.0e-6;
    p_desc = "epsilon";
 } epsilon;
 
@@ -218,17 +223,18 @@ paramdef double {
 } minRadialDistKm;
 
 paramdef int {
+   p_default = 100.0;
    p_desc = "Max number of nearest neighbors";
 } numNbrMax;
 
 paramdef double {
-   p_default = 0.0;
+   p_default = 1.0;
    p_desc = "Max Dist Base";
    p_help = "max point distance = base + factor * aircraftDist";
 } maxDistBase;
 
 paramdef double {
-   p_default = 0.0;
+   p_default = 0.016666;
    p_desc = "Max Dist Factor";
    p_help = "max point distance = base + factor * aircraftDist";
 } maxDistFactor;
@@ -240,7 +246,7 @@ commentdef {
 paramdef string {
    p_desc = "Force ncp and dbz to be ok on all points";
    p_help = "y/n";
-   p_default = "y";
+   p_default = "n";
 } forceOk;
 
 paramdef string {
@@ -265,6 +271,7 @@ paramdef string {
 } inDir;
 
 paramdef string {
+   p_default = "^cfrad";
    p_desc = "regex for files in inDir";
    p_help = "for example '^swp'";
 } fileRegex;
@@ -282,6 +289,7 @@ paramdef string {
 } outTxt;
 
 paramdef string {
+   p_default = "./";
    p_desc = "Output NetCDF file";
    p_help = "If outNc ends in a slash we make a subdir and write to yyyymmdd/ncf_yyyymmdd_hhmmss.nc";
 } outNc;
@@ -292,17 +300,17 @@ commentdef {
 
 paramdef string {
    p_desc = "Name of the radial wind field";
-   p_help = "VG for Eldora, VE for CSU-CHILL";
+   p_help = "VEL for NEXRAD, VG for Eldora, VE for CSU-CHILL";
 } radialName;
 
 paramdef string {
    p_desc = "Name of the reflectivity field";
-   p_help = "DBZ for Eldora, DZ for CSU-CHILL";
+   p_help = "REF for NEXRAD, DBZ for Eldora, DZ for CSU-CHILL";
 } dbzName;
 
 paramdef string {
-   p_desc = "Name of the net coherent power field";
-   p_help = "NCP for Eldora, NC for CSU-CHILL";
+   p_desc = "Name of the normalized coherent power field";
+   p_help = "Not available for NEXRAD, NCP for Eldora, NC for CSU-CHILL";
 } ncpName;
 
 commentdef {
