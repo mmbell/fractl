@@ -1372,7 +1372,11 @@ bool Fractl::fillWithObservations()
 
     bool fOk = true;
 
-    if (preGridded)
+    if (preGridded) {
+      std::cout << "Pre-gridded mode isn't supported at this time."
+		<< std::endl;
+      exit(1);
+      
       fOk = readPreGriddedFile(
 		  ifile,
 		  fspec,
@@ -1386,6 +1390,7 @@ bool Fractl::fillWithObservations()
 		  &maxAbsErrVert,
 		  timeMin,                  // returned
 		  timeMax);                 // returned
+    }
     else
       readRadarFile(
 		  forceOk,
