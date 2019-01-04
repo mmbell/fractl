@@ -257,7 +257,7 @@ paramdef string {
 
 paramdef string {
    p_desc = "pre-gridded";
-   p_help = "Data is pre-gridded";
+   p_help = "(NOT WORKING YET) Data is pre-gridded";
    p_default = "n";
 } preGridded;
 
