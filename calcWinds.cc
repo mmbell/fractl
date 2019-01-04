@@ -575,7 +575,7 @@ void Fractl::calcCellVU(
 
       // Using a conditionNumberCutoff > 10 causes some cells
       // to have extreme values for U and V.
-      double conditionNumberCutoff = 100;     // xxxx
+      double conditionNumberCutoff = 100;     // TODO: Set in parameter file
       if (pcell->conditionNumber < conditionNumberCutoff)
 	isCellOk = true;
       if (isCellOk) {
@@ -602,6 +602,16 @@ void Fractl::calcCellVU(
 	}
 	pcell->ustd = sqrt(ustd);
 	pcell->vstd = sqrt(vstd);
+
+        if (fabs(pcell->vv) > 100) { // TODO: Set max in parameter file
+          pcell->vv = numeric_limits<double>::quiet_NaN();
+	  pcell->vstd = numeric_limits<double>::quiet_NaN();
+	}
+        if (fabs(pcell->uu) > 100) { // TODO: Set max in parameter file
+          pcell->uu = numeric_limits<double>::quiet_NaN();
+	  pcell->ustd = numeric_limits<double>::quiet_NaN();
+	}
+
       } // if isCellOk
     } // if useEigen
 
@@ -827,7 +837,9 @@ void Fractl::calcAllWOnMish(
 		   - 4 * hcon * wgts[iz]);
 	    if (! isOkDouble( wwind))
 	      throwerr("calcAllW: invalid w wind");
-	    cellMat[iz][iy][ix].ww = wwind;
+	    if (fabs(wwind) < 50) { // TODO: Set in parameter file
+	      cellMat[iz][iy][ix].ww = wwind;
+	    } else cellMat[iz][iy][ix].ww = numeric_limits<double>::quiet_NaN();
 	  } else cellMat[iz][iy][ix].ww = numeric_limits<double>::quiet_NaN();
       } // for iz
       if (fabs(wwind - baseW) > epsilon) {
@@ -956,7 +968,9 @@ void Fractl::calcAllW(
 		   - 4 * hcon * wgts[iz]);
 	    if (! isOkDouble( wwind))
 	      throwerr("calcAllW: invalid w wind");
-	    cellMat[iz][iy][ix].ww = wwind;
+            if (fabs(wwind) < 50) { // TODO: Set in parameter file
+              cellMat[iz][iy][ix].ww = wwind;
+            } else cellMat[iz][iy][ix].ww = numeric_limits<double>::quiet_NaN();
 
 	    bool showDetail = testDetail(
 					 zgridmin + iz * zgridinc,      // z

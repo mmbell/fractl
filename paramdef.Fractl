@@ -37,13 +37,13 @@ commentdef {
 
 paramdef double {
    p_default = -20;
-   p_descr = "Minimum dbz value for valid data";
+   p_descr = "Minimum dBZ value for valid data";
    p_help = "Any value below that will be tossed out.\nExample: -20";
 } minDbz;
 
 paramdef double {
-   p_default = 0.3;
-   p_descr = "Minimum dbz value for valid data";
+   p_default = 0.0;
+   p_descr = "Minimum NCP value for valid data";
    p_help = "Any value below that will be tossed out.\nExample: 0.3";
 } minNcp;
 
