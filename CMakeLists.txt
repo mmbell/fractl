@@ -29,6 +29,10 @@ set ( CMAKE_BUILD_WITH_INSTALL_RPATH TRUE )
 set ( CMAKE_INSTALL_RPATH ${LROSE_LIB_DIR} )
 set ( CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE )
 
+# Use RUNPATH, not RPATH
+
+set ( CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags" )
+
 add_definitions ( -Wall -std=c++11 )
 
 set ( EXECUTABLE_OUTPUT_PATH build/release/bin )
