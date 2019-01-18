@@ -135,7 +135,7 @@ paramdef string {
 paramdef string {
    p_default = 1.0;
    p_desc = "Y grid description";
-   p_help = "\"min,max,incr\" or \"incr\"";
+`<   p_help = "\"min,max,incr\" or \"incr\"";
 } yGrid;
 
 paramdef string {
@@ -238,6 +238,30 @@ paramdef double {
    p_desc = "Max Dist Factor";
    p_help = "max point distance = base + factor * aircraftDist";
 } maxDistFactor;
+
+paramdef double {
+  p_default = 100.0;
+  p_dec = "Max U wind component";
+  p_help = "Maximum value for U wind component";
+} maxU;
+
+paramdef double {
+  p_default = 100.0;
+  p_dec = "Max V wind component";
+  p_help = "Maximum value for V wind component";
+} maxV;
+
+paramdef double {
+  p_default = 50.0;
+  p_dec = "Max W wind component";
+  p_help = "Maximum value for W wind component";
+} maxW;
+
+paramdef double {
+  p_default = 100.0;
+  p_dec = "Condition Number Cutoff";
+  p_help = "Maximum value for a cell ConditionNumber";
+} conditionNumberCutoff;
 
 commentdef {
    p_header = "FLAGS";

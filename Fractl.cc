@@ -235,6 +235,11 @@ Fractl::Fractl()
   minDbz = -20;           // Default. Overwrite with
   minNcp = 0.3;           // -minDbz and -minNcp
 
+  conditionNumberCutoff = 100.0;
+  maxU = MISS_PARM;
+  maxV = MISS_PARM;
+  maxW = MISS_PARM;
+  
   zgridmin = MISS_PARM;
   zgridmax = MISS_PARM;
   zgridinc = MISS_PARM;

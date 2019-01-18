@@ -66,13 +66,6 @@ public:
 
   static const int MISS_PARM = -99999;
 
-#if 0
-  static const int TESTMODE_ALPHA          = 1;
-  static const int TESTMODE_BETA           = 2;
-  static const int TESTMODE_ZETA           = 3;
-  static const int TESTMODE_ZETA_BELTRAMI  = 4;
-#endif
-
   static const long SYNFUNC_START = -999900;
   static const long SYNFUNC_SINX  = -999901;
   static const long SYNFUNC_SINY  = -999902;
@@ -360,6 +353,11 @@ private:
   double minDbz;
   double minNcp;
 
+  double conditionNumberCutoff;
+  double maxU;
+  double maxV;
+  double maxW;
+  
   // These are related to filtering and interpolation
 
   Params::filter_t uvFilter, wFilter;

@@ -24,6 +24,7 @@ bool Fractl::parseArgs(int argc, char *argv[])
 {
   std::unordered_set<std::string> keywordSet( {
       "minDbz", "minNcp", "testMode", "synWinds",
+	"conditionNumberCutoff", "maxU", "maxV", "maxW",
 	"radFiles", "zGrid", "yGrid", "xGrid", "gridType", "projName",
 	"projLat0", "projLon0", "baseW", "epsilon",
 	"maxDeltaAltKm", "maxAbsElevDeg", "minRadialDistKm",
@@ -105,7 +106,12 @@ bool Fractl::parseArgs(int argc, char *argv[])
   numNbrMax = params.numNbrMax;
   maxDistBase = params.maxDistBase;
   maxDistFactor = params.maxDistFactor;
-  
+
+  conditionNumberCutoff = params.conditionNumberCutoff;
+  maxU = params.maxU;
+  maxV = params.maxV;
+  maxW = params.maxW;
+
   forceOk = parseBool("forceOk", params.forceOk);
   useEigen = parseBool("useEigen", params.useEigen);
   preGridded = parseBool("preGridded", params.preGridded);
@@ -275,8 +281,12 @@ void Fractl::badparms( const string msg, ...) {
   cout << endl;
   cout << "  -minRadialDistKm  min radial distance of observations" << endl;
   cout << "                  from aircraft, km, or 0";
-  //xxxxa
   cout << endl;
+  cout << "  -maxU           Maximum value for U wind component" << endl;
+  cout << "  -maxV           Maximum value for V wind component" << endl;
+  cout << "  -maxU           Maximum value for W wind component" << endl;
+  cout << "  -conditionNumberCutoff    Maximum value for a cell ConditionNumber" << endl;
+  cout << endl;  
   cout << "  -numNbrMax      max num nearest nbrs" << endl;
   cout << "  -maxDistBase    max pt dist = base + factor*aircraftDist" << endl;
   cout << "  -maxDistFactor  max pt dist = base + factor*aircraftDist" << endl;
