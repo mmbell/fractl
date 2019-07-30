@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 3.0)
 project (fractl)
 
-set (CMAKE_BUILD_TYPE Release)
-
+set (CMAKE_BUILD_TYPE Debug)
+set ( CMAKE_CXX_FLAGS_DEBUG "-Wall -gdwarf-4 -g -std=c++11" )
 set (CMAKE_CXX_STANDARD 11)
 add_definitions (-Wall)
 
@@ -35,7 +35,7 @@ if (${CMAKE_SYSTEM_NAME} MATCHES "Linux")
   set ( CMAKE_EXE_LINKER_FLAGS "-Wl,--enable-new-dtags" )
 endif()
 
-add_definitions ( -Wall -std=c++11 )
+add_definitions ( -Wall -std=c++11)
 
 set ( EXECUTABLE_OUTPUT_PATH build/release/bin )
 

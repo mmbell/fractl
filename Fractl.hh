@@ -148,9 +148,8 @@ public:
 		Cell *** & cellMat);          // we set Cell.ww
   void calcAllWOnMish(
 		Cell *** & cellMat);          // we set Cell.ww
-
   double calcDensity( double height);
-
+  void cedricCalcAllW(Cell ***& cellMat);
 
   void checkVerif(
 		  long imain,
@@ -272,6 +271,27 @@ public:
   void freeCellMat();
   bool calcWinds();
 
+  // These are to support MASS2 from Cedric
+  
+  int ms2drv();
+  int pconvg(double *u, double *v, double *rbuf, int nx, 
+		     int ny, int nder, double *xydeli,
+		     double *csp, int iactc);
+  bool initMas2(double **csp, double **xydeli);
+  int dwiter(double *euc, double *evc, double *cvgc,
+	     double *wc, double *cvgp, double *wp,
+	     double *eup, double *evp,
+	     int nx, int ny, double *xydeli,
+	     double dzh, double rhoc, double rhop, double *c2rd, 
+	     int *iter, double *dmn,
+	     int *kst, int l, double zlev);
+  int bndfil(double *c__, double *a, double *b,
+	     int ni, int nj,
+	     int ibeg, int iend,
+	     int jbeg, int jend,
+	     int itmax, int nquad,
+	     int minpts, double bad);
+  
 private:
 
   // These are filled when parsing arguments
@@ -366,6 +386,20 @@ private:
   Params::interp_t uvInterp;
 
   Params::grid_type_t gridType;
+
+  Params::method_t windComputationMethod;
+  
+  // Cedric MASS2
+
+  double mas2ErrMax;
+  double mas2IterMax;
+  Params::direction_t mas2Dir;
+  Params::init_method_t lowerBoundaryInitMethod;
+  string initStr;
+  
+  // reflectivity-fallspeed relationship:
+  // VT = -vtA * (10.0 ** (0.1 * DBZ * vtB) * (rho(0) / rho(z) ** vtC
+  double vtA, vtB, vtC;
   
   // The data
 

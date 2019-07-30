@@ -33,7 +33,13 @@ bool Fractl::parseArgs(int argc, char *argv[])
 	"radialName", "dbzName", "ncpName", "outText", "outNc",
 	"detailSpec", "radarAlt", "gridType",
 	"uvFilter", "wFilter", "uvSteps", "uvMultiStep",
-	"wStep", "wMultiStep" "uvInterp" } );
+	"wStep", "wMultiStep" "uvInterp", "windComputationMethod",
+	// MASS2
+	"direction", "alpha", "integrationType", "lowerBoundaryInitMethod",
+	"initVal", "errMax", "iterMax",
+	"zLimitUnits", "zLowerLevel", "zUpperLevel", "zLastLevel",
+	"constA", "constB", "consC"
+	} );
 
   tdrp_override_t override;
   TDRP_init_override(&override);
@@ -149,6 +155,20 @@ bool Fractl::parseArgs(int argc, char *argv[])
 
   if(verbose)
     dumpArgs();
+
+  windComputationMethod = params.windComputationMethod;
+  
+  // Cedric MASS2
+
+  mas2ErrMax = params.errMax;
+  mas2IterMax = params.iterMax;
+  mas2Dir = params.direction;
+  lowerBoundaryInitMethod = params.lowerBoundaryInitMethod;
+  initStr = params.initVal;
+  
+  vtA = params.constA;
+  vtB = params.constB;
+  vtC = params.constC;
 
   return checkArgs();
 }

@@ -99,7 +99,9 @@ bool Fractl::calcWinds()
 
     // Based on u, v, calc w
 
-    if (gridType == Params::GRID_MISH)    
+    if(windComputationMethod == Params::METHOD_CEDRIC)	// For now, only deal with MESH
+      ms2drv();
+    else if (gridType == Params::GRID_MISH)    
       calcAllWOnMish(cellMat);
     else
       calcAllW(cellMat);
@@ -636,9 +638,9 @@ void Fractl::calcCellVU(
 	sxz += xval * zval;
 	syz += yval * zval;
       }
-      double detbase = sxx*syy - sxy*sxy;
-      double det1    = sxz*syy - syz*sxy;
-      double det2    = sxx*syz - sxy*sxz;
+      double detbase = sxx * syy - sxy * sxy;
+      double det1    = sxz * syy - syz * sxy;
+      double det2    = sxx * syz - sxy * sxz;
       if (bugs >= Params::DEBUG_EXTRA && showDetail) {
 	cout << "  calcCellVU: cramer: showDetail: "
 	     << "  sxx: " << sxx
@@ -750,6 +752,8 @@ void Fractl::calcCellVU(
 //
 //   totalFlow = 2 * sum_iz (density[iz] * H * wgt[iz])
 //   H = totalFlow / (2 * sum_iz (density[iz] * wgt[iz]))
+
+// TOTO Refactor. The difference between calcAllWonMish and calcAllW are the loop indices
 
 void Fractl::calcAllWOnMish(
 		      Cell ***& cellMat)           // We set Cell.ww
@@ -1036,7 +1040,16 @@ void Fractl::calcAllW(
   delete[] density;
   delete[] wgts;
 
-} // end calcAllWOnMish
+} // end calcAllW
+
+
+// Calc W the way Cedric does it with the MASS2 command
+// https://github.com/NCAR/lrose-cedric
+
+
+void Fractl::cedricCalcAllW(Cell ***& cellMat)           // We set Cell.ww
+{
+}
 
 //==================================================================
 

@@ -337,6 +337,23 @@ paramdef string {
    p_help = "Not available for NEXRAD, NCP for Eldora, NC for CSU-CHILL";
 } ncpName;
 
+// ---------------------------------------------------------
+
+commentdef {
+  p_header = "Wind computation method";
+};
+
+typedef enum {
+  METHOD_FRACTL, METHOD_CEDRIC
+} method_t;
+
+paramdef enum method_t {
+  p_default = METHOD_FRACTL;
+  p_desc = "Wind computation method";
+} windComputationMethod;
+
+// ---------------------------------------------------------
+
 commentdef {
   p_header = "FILTERS";
 };
@@ -390,4 +407,116 @@ paramdef enum interp_t {
   p_desc = "Missing U and V value interpolation";
   p_help = "Applied before calculating W";
 } uvInterp;
+
+// ---------------------------------------------------------
+
+commentdef {
+  p_header = "MASS FLOW 2";
+}
+
+typedef enum {
+  DIR_UP, DIR_DOWN
+} direction_t;
+
+// This is expected to be 1 or 2 in the code (It uses mod(, 2) to reverse dir
+
+paramdef enum direction_t {
+  p_default = DIR_UP;
+  p_descr = "Method of integration: Upward or Downward";
+  p_help = "";
+} direction;
+
+paramdef float {
+  p_default = 0.1;
+  p_descr = "Density Setting. Alpha used to compute RHO. Max: 1.0";
+  p_help = "RHO = exp( -z * alpha)";
+} alpha;
+    
+commentdef {
+  p_header = "Boundary Condition";
+}
+
+paramdef string {
+  p_default = "U*0.1";
+  p_descr = "Type of integration to be performed. M*nnnnnn";
+  p_help = "M:      method of integration U or D,"
+           "nnnnnn: term in the density weighting function\n"
+           "    rho = exp(-z * nnnnnn)\n"
+           "    z: height in kilometer\n"
+           "    If * after M, density weighting. nnnnnn defaults to 0.1\n"
+           "    If no *: rh = identity";
+} integrationType;
+
+typedef enum {
+  INIT_CONST, INIT_FRACT, INIT_FIELD
+} init_method_t;
+
+paramdef enum init_method_t {
+  p_default = INIT_CONST;
+  p_descr = "Lower Boundary Initialization method";
+  p_help = "INIT_CONST: Init with given constant\n"
+           "INIT_FRACT: Init with fraction of the field being integrated\n"
+           "INIT_FIELD: Init using value at same xy-location in another field";
+} lowerBoundaryInitMethod;
+
+paramdef string {
+  p_default = "";
+  p_descr = "Value to be used depending on lowerBoundaryInitMethod";
+  p_help = "CONST: default 0.0, FRACT: default 1.0, FIELD: name must be given";
+} initVal;
+
+typedef enum {
+  UNIT_KM, UNIT_INDEX
+} level_unit_t;
+
+paramdef enum level_unit_t {
+  p_default = UNIT_KM;
+  p_descr = "Specify zLower and zUpper in km or indices";
+} zLimitUnits;
+
+paramdef double {
+  p_descr = "Lowest Z-level to be included in the integration procecure";
+  p_help = "In km, or an index depending on zLimitUnits";
+} zLowerLevel;
+
+paramdef double {
+  p_descr = "Upper Z-level to be included in the integration procecure";
+  p_help = "In km, or an index depending on zLimitUnits";
+} zUpperLevel;
+
+paramdef double {
+  p_descr = "Level past which integration with cease.\n"
+            "(last level at which a boundary condition will be set)";
+  p_help = "In km, or an index depending on zLimitUnits";
+} zLastLevel;
+
+paramdef double {
+   p_default = 1.5;
+   p_descr = "Constant A in reflectivity - fallspeed relationship";
+   p_help = "vt = -A * (10.0 ** (0.1 * dbz * B) * (rho(0) / rho(Z))) ** C";
+} constA;
+
+paramdef double {
+   p_default = 0.105;
+   p_descr = "Constant B in reflectivity - fallspeed relationship";
+   p_help = "vt = -A * (10.0 ** (0.1 * dbz * B) * (rho(0) / rho(Z))) ** C";
+} constB;
+
+paramdef double {
+   p_default = 0.4;
+   p_descr = "Constant C in reflectivity - fallspeed relationship";
+   p_help = "vt = -A * (10.0 ** (0.1 * dbz * B) * (rho(0) / rho(Z))) ** C";
+} constC;
+
+paramdef double {
+  p_descr = "MASS2 target difference between conscutive iterations";
+  p_help = "mean difference between vert. and hor. conv. min val cutoff";
+  p_default = 0.01;
+} errMax;
+
+paramdef double {
+  p_descr = "MASS2 Max number of iterations at each level. Between +-[1..25]";
+  p_help = "If negative, iterate exactly abs(vaue) regardless of convergence";
+  p_default = 10;
+} iterMax;
 

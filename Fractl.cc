@@ -1023,11 +1023,13 @@ void Fractl::splitString(
   vector<string>& tokens)       // appended
 {
   // Scan to find beginning of first token.
-  long begPos = str.find_first_not_of(delimiters, 0);
+  unsigned begPos = str.find_first_not_of(delimiters, 0);
 
-  while (begPos != string::npos) {
+  while (begPos < str.length()) {
     // Find end of this token
-    long endPos = str.find_first_of(delimiters, begPos);
+    unsigned endPos = str.find_first_of(delimiters, begPos);
+    if (endPos > str.length())
+      endPos = str.length();
     tokens.push_back( str.substr( begPos, endPos - begPos));
     // Find start of next token
     begPos = str.find_first_not_of( delimiters, endPos);
@@ -1202,6 +1204,20 @@ bool Fractl::checkArgs()
   if (outNc == "") badparms("parameter not specified: -outNc");
 
   if (projName != "transverseMercator") badparms("unknown projName");
+
+  // MASS2
+  
+  switch(lowerBoundaryInitMethod) {
+  case Params::INIT_CONST:
+  case Params::INIT_FRACT:
+    // iniVal = std::stof(initVal); TODO
+    break;
+  case Params::INIT_FIELD:
+    std::cout << "Lower boundary init method ' isn't implemented yet."
+	      << std::endl;
+    exit(1);
+  }
+    
   printRunTime("init", &timea);
 
   return true;
@@ -1345,7 +1361,7 @@ bool Fractl::fillWithObservations()
   // Get a list of files to load
 
   vector<FileSpec *>* fsubsetList = new vector<FileSpec *>();
-  for (long ifile = 0; ifile < fspecList->size(); ifile++) {
+  for (unsigned ifile = 0; ifile < fspecList->size(); ifile++) {
     FileSpec * fspec = fspecList->at( ifile);
     if ( (radFiles[0] == 0 && radFiles[1] == 0)
 	 || (ifile >= radFiles[0] && ifile < radFiles[1] ))
@@ -1371,7 +1387,7 @@ bool Fractl::fillWithObservations()
   Statistic statDbz;
   Statistic statNcp;
 
-  for (long ifile = 0; ifile < fsubsetList->size(); ifile++) {
+  for (unsigned ifile = 0; ifile < fsubsetList->size(); ifile++) {
     FileSpec * fspec = fsubsetList->at( ifile);
     cout << "main: start fpath: " << fspec->fpath << endl;
 

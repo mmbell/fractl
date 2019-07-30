@@ -455,7 +455,7 @@ void Fractl::readRadarFile(
       // before going to the expense of finding the y,x coords.
       // If not missing and ...
 
-      bool usePoint = false;
+      // bool usePoint = false;
       if ( valVg != missVg
         && valDbz != missDbz && (forceOk || valDbz >= minDbz)
         && valNcp != missNcp && (forceOk || valNcp >= minNcp)
@@ -506,7 +506,7 @@ void Fractl::readRadarFile(
 	    ( ygridmin == MISS_PARM || (coordy >= ygridmin && coordy < ygridmax)) &&
 	    ( xgridmin == MISS_PARM || (coordx >= xgridmin && coordx < xgridmax)))
         {
-          usePoint = true;
+          // usePoint = true;
           numGoodPoint++;
           bool showDetail = testDetail(
             coordz,            // z

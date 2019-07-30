@@ -1,0 +1,63 @@
+
+ms2drv (called by mass2 command)
+
+- Initialize a bunch of stuf depending on arguments
+
+- For each level l (could be ascending or decending, depending on IDIR)
+
+   - if level out of k1..k2
+        fill obuf with bad
+
+   - Get field 1..4 for this level from ??? into rbuf(1, 1..4)
+   - Potentially get dbz for this level into rbuf(1, 5)
+        if 'MXDBZ' (given as argument to MASS2) is found
+	
+   - For each nplane i (number of grid points per field per plane)
+   
+      if(rbuf(1, 3) is bad -> rbuf(i, 1) = bad
+      if(rbuf(1, 4) is bad -> rbuf(i, 2) = bad
+
+      - if we have dbz initialize fallspeed
+         - if rbuf(1, 5) != bad
+	    vt = -adven * 10.0 ** (0.1 * vtcon(2) * rbuf(1, 5))
+            if rbuf(i, 1) != bad
+	       rbuf(i, 1) = rbuf(i, 1) + vt * rbuf(i, 3)
+            if rbuf(i, 2) != bad
+	       rbuf(i, 2) = rbuf(i, 2) + vt * rbuf(i, 4
+
+   - call pconvg(rbuf(1, 1), rbuf(1, 2), rbuf(1, 5), ...)    (U, V, dbz, ...)
+        This overwrites rbuf(1, 5) which was dbz
+   - set rbuf(1, 6) to bad
+	       
+   - If past initial level
+      - call dwiter(obuf,      scratch buffer
+         rbuf(1, 3)            *EUC       error term
+	 rbuf(1, 4)            *EVC 
+	 rbuf(1, 5)            *CVGC      convergence at curr level
+	 rbuf(1, 6)            *WC        W estimate at this level
+	 rbuf(1, 7)            CVGP       convergence at previous level 
+	 rbuf(1, 8)            WP         w from previous level
+	 rbuf(1, 9)            EUP        U error term from prev lev
+	 rbuf(1, 10)           EVP        V
+	 ...
+
+   TODO some boundary init (line 336-360)
+
+   Get everything ready for next level
+   - For each nplane i (number of grid points per field per plane)
+   
+      rbuf(i, 7) = rbuf(i, 5)
+      rbuf(i, 8) = rbuf(i, 6)
+      rbuf(i, 9) = rbuf(i, 3)
+      rbuf(i, 10) = rbuf(i, 4)
+
+      if rbuf(i, 6) != bad
+         rbuf(i, 1) += rbuf(i, 6) * rbuf(i, 3)
+         rbuf(i, 2) += rbuf(i, 6) * rbuf(i, 4)
+      else
+         rbuf(i, 1) = bad)
+         rbuf(i, 2) = bad)
+
+pconvg(U, V, rbuf, nx, ny, nder, xydeli...)
+
+
