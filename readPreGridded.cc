@@ -21,17 +21,17 @@
 // NetCDF: See doc at:
 //   netcdfC/tda/netcdf-4.1.3/examples/CXX/pres_temp_4D_wr.cpp
 
-#include <netcdfcpp.h>
+#include <Ncxx/Nc3xFile.hh>
 
 // Forward declaration of helper functions
 
-bool getFillValue(NcVar *var, float &val);
-bool getDimInfo(NcFile &file, int dim, const char *varName,
+bool getFillValue(Nc3Var *var, float &val);
+bool getDimInfo(Nc3File &file, int dim, const char *varName,
 		float &spacing, float &min, float &max);
-bool getGlobalAttribute(NcFile &file, std::string name, float &val);
-bool getGridMapping(NcFile &file, float &radar_lat, float &radar_lon);
-bool getOriginLatLon(NcFile &file, float &lat, float &lon);
-bool getTime(NcFile &file, const char *varName, double &time);
+bool getGlobalAttribute(Nc3File &file, std::string name, float &val);
+bool getGridMapping(Nc3File &file, float &radar_lat, float &radar_lon);
+bool getOriginLatLon(Nc3File &file, float &lat, float &lon);
+bool getTime(Nc3File &file, const char *varName, double &time);
   
 // TODO
 // Bbox      (overall bounding box of aircraft locs
@@ -60,10 +60,10 @@ bool Fractl::readPreGriddedFile(
   double          & timeMax)         // returned
 
 {
-  NcError ncError(NcError::verbose_nonfatal); // Prevent NertCDF error from exiting the program
+  Nc3Error ncError(Nc3Error::verbose_nonfatal); // Prevent NertCDF error from exiting the program
 
   // Open the file
-  NcFile file(fspec->fpath.c_str(), NcFile::ReadOnly);
+  Nc3File file(fspec->fpath.c_str(), Nc3File::ReadOnly);
 
   if (! file.is_valid() ) {
     std::cerr << "Can't read, (or not a netCDF file) " <<  fspec->fpath.c_str()
@@ -73,9 +73,9 @@ bool Fractl::readPreGriddedFile(
 
   // Read the dimentions
 
-  NcDim *x0 = file.get_dim("x0");
-  NcDim *y0 = file.get_dim("y0");
-  NcDim *z0 = file.get_dim("z0");
+  Nc3Dim *x0 = file.get_dim("x0");
+  Nc3Dim *y0 = file.get_dim("y0");
+  Nc3Dim *z0 = file.get_dim("z0");
 
   // TODO set variables in Fractl object instead
 
@@ -170,14 +170,14 @@ bool Fractl::readPreGriddedFile(
   
   fspec->altitudeKmMsl = radarAlt;
   
-  NcVar *reflectivity = file.get_var(dbzName.c_str());
+  Nc3Var *reflectivity = file.get_var(dbzName.c_str());
   if (reflectivity == NULL) {
     std::cerr << "Can't get reflectivity '" << dbzName
 	      << "' from " << fspec->fpath << std::endl;
     return false;
   }
 
-  NcVar *velocity = file.get_var(radialName.c_str());
+  Nc3Var *velocity = file.get_var(radialName.c_str());
   if (velocity == NULL) {
     std::cerr << "Can't get velocity '" << dbzName
 	      << "' from " << fspec->fpath << std::endl;
@@ -185,7 +185,7 @@ bool Fractl::readPreGriddedFile(
   }
 
 #if 0	// TODO no such field in pre-gridded files
-  NcVar *netCoherentPower = file.get_var(ncpName.c_str());
+  Nc3Var *netCoherentPower = file.get_var(ncpName.c_str());
   if (netCoherentPower == NULL) {
     std::cerr << "Can't get Net Coherent Power '" << ncpName
 	      << "' from " << fspec->fpath << std::endl;
@@ -342,26 +342,26 @@ bool Fractl::readPreGriddedFile(
   return true;
 }
 
-bool getFillValue(NcVar *var, float &val)
+bool getFillValue(Nc3Var *var, float &val)
 {
-  NcAtt *fv = var->get_att("_FillValue");
+  Nc3Att *fv = var->get_att("_FillValue");
   if (fv == NULL)
     return false;
   val = fv->as_float(0);
   return true;
 }
 
-bool getTime(NcFile &file, const char *varName, double &time){
-  NcVar *var = file.get_var(varName);
+bool getTime(Nc3File &file, const char *varName, double &time){
+  Nc3Var *var = file.get_var(varName);
   if (var == NULL) return false;
 
   return var->get(&time, 1);
 }
   
-bool getDimInfo(NcFile &file, int dim, const char *varName,
+bool getDimInfo(Nc3File &file, int dim, const char *varName,
 			   float &spacing, float &min, float &max)
 {
-  NcVar *var = file.get_var(varName);
+  Nc3Var *var = file.get_var(varName);
   if (var == NULL) return false;
     
   float *vals = new float[dim];
@@ -378,17 +378,17 @@ bool getDimInfo(NcFile &file, int dim, const char *varName,
 
 // Radar location. usually at (0, 0) kilometers
 
-bool getGridMapping(NcFile &file, float &radar_lat, float &radar_lon)
+bool getGridMapping(Nc3File &file, float &radar_lat, float &radar_lon)
 {
-  NcVar *grid_mapping = file.get_var("grid_mapping_0");
+  Nc3Var *grid_mapping = file.get_var("grid_mapping_0");
   if (grid_mapping == NULL)
     return false;
-  NcAtt *olat = grid_mapping->get_att("latitude_of_projection_origin");
+  Nc3Att *olat = grid_mapping->get_att("latitude_of_projection_origin");
   if (olat == NULL)
     return false;
   radar_lat = olat->as_float(0);
   
-  NcAtt *olon = grid_mapping->get_att("longitude_of_projection_origin");
+  Nc3Att *olon = grid_mapping->get_att("longitude_of_projection_origin");
   if (olon == NULL)
     return false;
   radar_lon = olon->as_float(0);
@@ -397,13 +397,13 @@ bool getGridMapping(NcFile &file, float &radar_lat, float &radar_lon)
 
 // Get Lat and Lon at lower left corner of grid.
 
-bool getOriginLatLon(NcFile &file, float &lat, float &lon)
+bool getOriginLatLon(Nc3File &file, float &lat, float &lon)
 {
-  NcVar *lat0 = file.get_var("lat0");
+  Nc3Var *lat0 = file.get_var("lat0");
   if ( lat0 == NULL )
     return false;
   
-  NcVar *lon0 = file.get_var("lon0");
+  Nc3Var *lon0 = file.get_var("lon0");
   if ( lon0 == NULL )
     return false;
   
@@ -432,8 +432,8 @@ bool getOriginLatLon(NcFile &file, float &lat, float &lon)
   return true;
 }
 
-bool getGlobalAttribute(NcFile &file, std::string name, float &val) {
-  NcAtt *attr = file.get_att(name.c_str());
+bool getGlobalAttribute(Nc3File &file, std::string name, float &val) {
+  Nc3Att *attr = file.get_att(name.c_str());
   if ( attr == NULL )
     return false;
   val = attr->as_float(0);

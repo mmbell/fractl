@@ -1,4 +1,4 @@
-cmake_minimum_required (VERSION 3.0)
+cmake_minimum_required (VERSION 2.8)
 project (fractl)
 
 set (CMAKE_BUILD_TYPE Release)
@@ -8,8 +8,6 @@ add_definitions (-Wall)
 
 set (CMAKE_BINARY_DIR ${CMAKE_SOURCE_DIR}/bin)
 set (EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR})
-
-set (NETCDF_CXX)
 
 # Where to find *Find*.cmake and *-config.cmake
 
