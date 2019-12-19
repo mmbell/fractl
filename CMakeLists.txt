@@ -42,7 +42,7 @@ set ( EXECUTABLE_OUTPUT_PATH build/release/bin )
 file ( GLOB sources *.cc *.hh )
 set ( sources ${sources} Params.cc )	 # Add the 2 generated files
 
-include_directories ( ${LROSE_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} )
+include_directories ( /usr/local/include ${LROSE_INCLUDE_DIRS} ${EIGEN3_INCLUDE_DIR} )
 
 # Generate the argument files
 
