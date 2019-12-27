@@ -49,15 +49,14 @@ bool Fractl::parseArgs(int argc, char *argv[])
       sprintf(tmp_str, "%s = %s;", arg, argv[++i]);
       TDRP_add_override(&override, tmp_str);      
     } else {
-      // This one has specific meaning to TDRP.
-      if ( ! strcmp(argv[i], "-params" ) )
-	i++;
-    
       // Print help information.
       if ( ! strcmp(argv[i], "-h" ) ) {
 	printusage();
         exit(0);
       }
+      // This one has specific meaning to TDRP.
+      if ( ! strcmp(argv[i], "-params" ) )
+	i++;    
     }
    
   }
