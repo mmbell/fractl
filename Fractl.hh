@@ -72,6 +72,7 @@ public:
   static const long SYNFUNC_SINZ  = -999903;
 
   void badparms( const string msg, ...);
+  void printusage();
 
   Fractl();
   ~Fractl();

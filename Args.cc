@@ -52,7 +52,14 @@ bool Fractl::parseArgs(int argc, char *argv[])
       // This one has specific meaning to TDRP.
       if ( ! strcmp(argv[i], "-params" ) )
 	i++;
+    
+      // Print help information.
+      if ( ! strcmp(argv[i], "-h" ) ) {
+	printusage();
+        exit(0);
+      }
     }
+   
   }
 
   // Now parse the config file
@@ -208,6 +215,14 @@ void Fractl::badparms( const string msg, ...) {
 
   cout << "Fractl: error:" << endl;
   cout << buf << endl;
+  printusage();
+  exit(1);
+}
+
+// Print usage info
+
+void Fractl::printusage() {
+
   cout << "Parameters:\n" << endl;
   cout << "  -bugs           debug level" << endl;
   cout << endl;
@@ -364,8 +379,6 @@ void Fractl::badparms( const string msg, ...) {
   cout << " -uvInterp       What method to use to interpolate missing U and V values" << endl;
   cout << "                     Default INTERP_NONE" << endl;
   cout << endl;
-
-  exit(1);
 }
 
 bool Fractl::parseSynWinds(char *param, double *synWinds)
