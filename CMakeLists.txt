@@ -52,7 +52,7 @@ add_custom_command (
   DEPENDS paramdef.Fractl
   )
 
-link_directories( /usr/local/lib ${LROSE_LIB_DIR} /usr/lib/hdf5/serial )
+link_directories( /usr/local/lib ${LROSE_LIB_DIR} /usr/lib/x86_64-linux-gnu/hdf5/serial )
 add_executable ( ${PROJECT_NAME} ${sources} )
 
 target_link_libraries ( ${PROJECT_NAME} ${GeographicLib_LIBRARIES}  ${LROSE_LIBRARIES}  bz2 )
