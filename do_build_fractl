@@ -18,6 +18,7 @@ function usage() {
     echo "  -l ? :  set lrose install dir"
     echo "          default is /usr/local/lrose"
     echo "  -i   :  perform install after build"
+    echo "  -3   :  use cmake3 instead of cmake"
     echo
 }
 
@@ -26,9 +27,10 @@ debug=false
 prefix=/usr/local/lrose
 lrose_install_dir=/usr/local/lrose
 do_install=false
+use_cmake3=false
 
 # Parse command line options.
-while getopts hdip:l: OPT; do
+while getopts hdi3p:l: OPT; do
     case "$OPT" in
         h)
             usage
@@ -45,6 +47,9 @@ while getopts hdip:l: OPT; do
             ;;
         i)
             do_install=true
+            ;;
+        3)
+            use_cmake3=true
             ;;
         \?)
             # getopts issues an error message
@@ -72,7 +77,13 @@ export CMAKE_INSTALL_PREFIX=$prefix
 
 # create makefiles
 
-cmake -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} .
+if [ "$use_cmake3" = "true" ]
+then
+    echo "Note - using cmake3"
+    cmake3 -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} .
+else
+    cmake -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX} .
+fi
 
 # do the build
 
