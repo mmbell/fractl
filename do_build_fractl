@@ -1,0 +1,94 @@
+#! /bin/bash
+
+# perform builds for fractl
+
+#--------------------------------------------------------------------
+# usage function
+#
+
+function usage() {
+    echo
+    echo "Perform builds for specified package"
+    echo "Usage:"
+    echo "  $scriptName [options below]"
+    echo "  -h   :  help"
+    echo "  -d   :  turn debugging on"
+    echo "  -p ? :  prefix for installing fractl"
+    echo "          default is /usr/local/lrose"
+    echo "  -l ? :  set lrose install dir"
+    echo "          default is /usr/local/lrose"
+    echo "  -i   :  perform install after build"
+    echo "  -3   :  use cmake3 instead of cmake"
+    echo
+}
+
+scriptName=$(basename $0)
+debug=false
+prefix=/usr/local/lrose
+lrose_install_dir=/usr/local/lrose
+do_install=false
+use_cmake3=false
+
+# Parse command line options.
+while getopts hdi3p:l: OPT; do
+    case "$OPT" in
+        h)
+            usage
+            exit 0
+            ;;
+        d)
+            debug=true
+            ;;
+        p)
+            prefix=$OPTARG
+            ;;
+        l)
+            lrose_install_dir=$OPTARG
+            ;;
+        i)
+            do_install=true
+            ;;
+        3)
+            use_cmake3=true
+            ;;
+        \?)
+            # getopts issues an error message
+            echo "Problems with command line usage"
+            usage
+            exit 1
+            ;;
+    esac
+done
+
+echo "===>> Building fractl <<==="
+echo "      prefix: $prefix"
+echo "      lrose_install_dir: $lrose_install_dir"
+echo "      do_install: $do_install"
+
+export LROSE_ROOT_DIR=$prefix
+
+# clean up
+
+/bin/rm -f CMakeCache.txt
+
+# create makefiles
+
+if [ "$use_cmake3" = "true" ]
+then
+    echo "Note - using cmake3"
+    cmake3 -DCMAKE_INSTALL_PREFIX=${prefix} .
+else
+    cmake -DCMAKE_INSTALL_PREFIX=${prefix} .
+fi
+
+# do the build
+
+make -j 8
+
+# do the install
+
+if [ "$do_install" = "true" ]
+then
+    make install
+fi
+
