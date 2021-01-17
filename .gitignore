@@ -10,6 +10,4 @@ Makefile
 build
 hide
 cmake_install.cmake
-
-
-
+install_manifest.txt
