@@ -43,7 +43,7 @@ set ( sources ${sources} Params.cc )	 # Add the 2 generated files
 
 include_directories ( /usr/local/include ${LROSE_PREFIX}/include ${EIGEN3_INCLUDE_DIR} )
 
-# Generate the argument files
+# Link
 
 link_directories( /usr/local/lib ${LROSE_PREFIX}/lib /usr/lib/x86_64-linux-gnu/hdf5/serial )
 add_executable ( ${PROJECT_NAME} ${sources} )
@@ -51,5 +51,7 @@ add_executable ( ${PROJECT_NAME} ${sources} )
 target_link_libraries ( ${PROJECT_NAME} ${GeographicLib_LIBRARIES} )
 target_link_libraries ( ${PROJECT_NAME} ${LROSE_LIBRARIES} )
 target_link_libraries ( ${PROJECT_NAME} bz2 )
+
+# install
 
 install ( TARGETS ${PROJECT_NAME} DESTINATION ${LROSE_PREFIX}/bin )
