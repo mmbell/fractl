@@ -11,7 +11,7 @@ set ( LROSE_INCLUDE_DIRS ${LROSE_PREFIX}/include )
 set ( LROSE_LIB_DIR ${LROSE_PREFIX}/lib )
 set ( LROSE_BIN_DIR ${LROSE_PREFIX}/bin )
 set ( LROSE_DEFINITIONS -L ${LROSE_LIB_DIR} )
-set ( LROSE_LIBRARIES -lkd -ltdrp -lRadx -lNcxx -lnetcdf -lhdf5_cpp -lhdf5 -lz )
+set ( LROSE_LIBRARIES -lkd -ltdrp -lRadx -lNcxx -ltoolsa -lnetcdf -lhdf5_cpp -lhdf5 -lz )
 
 find_program ( TDRP_EXECUTABLE tdrp_gen PATHS ${LROSE_BIN_DIR} /usr/local/bin )
 
