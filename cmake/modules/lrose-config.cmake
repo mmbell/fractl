@@ -1,18 +1,52 @@
 # User can tell us where to look
 
-set ( LROSE_PREFIX $ENV{LROSE_INSTALL_DIR})
+set(LROSE_PREFIX $ENV{LROSE_INSTALL_DIR})
 
 # If not, use the default location
-if (NOT LROSE_PREFIX)
-  set (LROSE_PREFIX "/usr/local/lrose")
-endif ( NOT LROSE_PREFIX )
+if(NOT LROSE_PREFIX)
+  set(LROSE_PREFIX "/usr/local/lrose")
+endif(NOT LROSE_PREFIX)
 
-set ( LROSE_LIBRARIES kd tdrp Radx Ncxx toolsa netcdf hdf5_cpp hdf5 z )
+set ( LROSE_LIBRARIES
+        Refract
+        FiltAlg
+        dsdata
+        radar
+        hydro
+        titan
+        Fmq
+        Spdb
+        Mdv
+        advect
+        rapplot
+        Radx
+        Ncxx
+        rapformats
+        dsserver
+        didss
+        grib
+        grib2
+        contour
+        euclid
+        rapmath
+        kd
+        physics
+        toolsa
+        dataport
+        tdrp
+        netcdf
+        hdf5_cpp
+        hdf5
+        z
+        bz2
+        pthread
+        fftw3
+        )
 
 # Add a custom generator for TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
 
-find_program ( TDRP_EXECUTABLE tdrp_gen PATHS ${LROSE_BIN_DIR} /usr/local/bin )
+find_program(TDRP_EXECUTABLE tdrp_gen PATHS ${LROSE_BIN_DIR} /usr/local/bin)
 
 add_custom_command (
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
@@ -25,8 +59,6 @@ add_custom_command (
   COMMENT "Generating/updating Params.hh and Params.cc for ${PROJECT_NAME}"
   )
 
-message ( STATUS "lrose-config: CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX} )
-message ( STATUS "lrose-config: LROSE_PREFIX: " ${LROSE_PREFIX} )
-message ( STATUS "lrose-config: LROSE_LIBRARIES: " ${LROSE_LIBRARIES} )
-message ( STATUS "lrose-config: TDRP_EXECUTABLE: " ${TDRP_EXECUTABLE} )
-
+message(STATUS "lrose-config: CMAKE_INSTALL_PREFIX: " ${CMAKE_INSTALL_PREFIX})
+message(STATUS "lrose-config: LROSE_PREFIX: " ${LROSE_PREFIX})
+message(STATUS "lrose-config: TDRP_EXECUTABLE: " ${TDRP_EXECUTABLE})

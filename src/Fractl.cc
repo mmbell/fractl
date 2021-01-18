@@ -1023,7 +1023,7 @@ void Fractl::splitString(
   vector<string>& tokens)       // appended
 {
   // Scan to find beginning of first token.
-  long begPos = str.find_first_not_of(delimiters, 0);
+  size_t begPos = str.find_first_not_of(delimiters, 0);
 
   while (begPos != string::npos) {
     // Find end of this token
@@ -1345,7 +1345,7 @@ bool Fractl::fillWithObservations()
   // Get a list of files to load
 
   vector<FileSpec *>* fsubsetList = new vector<FileSpec *>();
-  for (long ifile = 0; ifile < fspecList->size(); ifile++) {
+  for (ssize_t ifile = 0; ifile < (ssize_t) fspecList->size(); ifile++) {
     FileSpec * fspec = fspecList->at( ifile);
     if ( (radFiles[0] == 0 && radFiles[1] == 0)
 	 || (ifile >= radFiles[0] && ifile < radFiles[1] ))
@@ -1371,7 +1371,7 @@ bool Fractl::fillWithObservations()
   Statistic statDbz;
   Statistic statNcp;
 
-  for (long ifile = 0; ifile < fsubsetList->size(); ifile++) {
+  for (size_t ifile = 0; ifile < fsubsetList->size(); ifile++) {
     FileSpec * fspec = fsubsetList->at( ifile);
     cout << "main: start fpath: " << fspec->fpath << endl;
 
@@ -1458,12 +1458,12 @@ bool Fractl::fillWithObservations()
 bool Fractl::buildKdTree()
 {
   // Build the KD tree for 3D radar observations
-  long npt = pointVec->size();
+  size_t npt = pointVec->size();
   cout << "npt: " << npt << endl;
 
   KD_real **radarKdMat = new KD_real*[npt];     // npt x ndim
 
-  for (long ii = 0; ii < npt; ii++) {
+  for (size_t ii = 0; ii < npt; ii++) {
     radarKdMat[ii] = new KD_real[ndim];
     Point * pt = pointVec->at(ii);
     radarKdMat[ii][0] = pt->coordz;        // z

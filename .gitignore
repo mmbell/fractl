@@ -1,8 +1,6 @@
 *.o
 *~
 *.log
-Params.cc
-Params.hh
 CMakeFiles
 CMakeCache.txt
 Fractl
