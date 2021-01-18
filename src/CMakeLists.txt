@@ -6,12 +6,10 @@ project(fractl)
 
 add_definitions(-std=c++11)
 
-# find the packages
+# If needed, generate TDRP Params.cc and Params.hh files
+# from their associated paramdef.<app> file
 
-find_package(LROSE REQUIRED)
-find_package(LibZip REQUIRED)
-find_package(GeographicLib REQUIRED)
-find_package(Eigen3 REQUIRED)
+makeTdrpParams()
 
 # includes
 

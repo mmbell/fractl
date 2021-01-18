@@ -12,6 +12,13 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 set(CMAKE_PREFIX_PATH ${CMAKE_MODULE_PATH})
 
+# find the packages
+
+find_package(LROSE REQUIRED)
+find_package(LibZip REQUIRED)
+find_package(GeographicLib REQUIRED)
+find_package(Eigen3 REQUIRED)
+
 # enable testing for this dir and below
 
 enable_testing()
