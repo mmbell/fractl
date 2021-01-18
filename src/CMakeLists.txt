@@ -27,7 +27,7 @@ link_directories(/usr/local/lib)
 
 # location of bin as it is built
 
-set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/bin)
+set(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/release/bin)
 
 # build app
 
