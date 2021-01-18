@@ -7,46 +7,12 @@ if(NOT LROSE_PREFIX)
   set(LROSE_PREFIX "/usr/local/lrose")
 endif(NOT LROSE_PREFIX)
 
-set ( LROSE_LIBRARIES
-        Refract
-        FiltAlg
-        dsdata
-        radar
-        hydro
-        titan
-        Fmq
-        Spdb
-        Mdv
-        advect
-        rapplot
-        Radx
-        Ncxx
-        rapformats
-        dsserver
-        didss
-        grib
-        grib2
-        contour
-        euclid
-        rapmath
-        kd
-        physics
-        toolsa
-        dataport
-        tdrp
-        netcdf
-        hdf5_cpp
-        hdf5
-        z
-        bz2
-        pthread
-        fftw3
-        )
+set(LROSE_LIBRARIES kd tdrp Radx Ncxx toolsa dataport netcdf hdf5_cpp hdf5 z)
 
 # Add a custom generator for TDRP Params.cc and Params.hh files
 # from their associated paramdef.<app> file
 
-find_program(TDRP_EXECUTABLE tdrp_gen PATHS ${LROSE_BIN_DIR} /usr/local/bin)
+find_program(TDRP_EXECUTABLE tdrp_gen PATHS ${LROSE_BIN_DIR} /usr/local/lrose/bin)
 
 add_custom_command (
   OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/Params.hh ${CMAKE_CURRENT_SOURCE_DIR}/Params.cc
