@@ -48,7 +48,6 @@ add_executable (
 
 # link
 
-#target_link_libraries(${PROJECT_NAME} ${GeographicLib_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} ${LROSE_LIBRARIES})
 target_link_libraries(${PROJECT_NAME} bz2)
 

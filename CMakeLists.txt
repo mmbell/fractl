@@ -15,8 +15,6 @@ set(CMAKE_PREFIX_PATH ${CMAKE_MODULE_PATH})
 # find the packages
 
 find_package(LROSE REQUIRED)
-find_package(LibZip REQUIRED)
-#find_package(GeographicLib REQUIRED)
 find_package(Eigen3 REQUIRED)
 
 # enable testing for this dir and below

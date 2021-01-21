@@ -35,8 +35,8 @@
 //   http://geographiclib.sourceforge.net/html/geodesic.html
 //   http://geographiclib.sourceforge.net/html/classGeographicLib_1_1TransverseMercatorExact.html
 
-#include <GeographicLib/Geodesic.hpp>
-#include <GeographicLib/TransverseMercatorExact.hpp>
+#include <euclid/GeographicLib/Geodesic.hpp>
+#include <euclid/GeographicLib/TransverseMercatorExact.hpp>
 
 // TODO revisit these globals.
 
