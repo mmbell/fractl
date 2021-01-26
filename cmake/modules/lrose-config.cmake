@@ -7,7 +7,7 @@ if(NOT LROSE_PREFIX)
   set(LROSE_PREFIX "/usr/local/lrose")
 endif(NOT LROSE_PREFIX)
 
-set(LROSE_LIBRARIES kd tdrp Radx Ncxx rapmath toolsa euclid dataport netcdf hdf5_cpp hdf5 z)
+set(LROSE_LIBRARIES kd tdrp Radx Ncxx euclid rapmath toolsa dataport netcdf hdf5_cpp hdf5 z)
 
 # Function for creating TDRP Params.cc and Params.hh files
 
