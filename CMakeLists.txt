@@ -1,6 +1,7 @@
 # cmake for fractl
 
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.0)
+set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 # project name and build type
 
@@ -12,7 +13,22 @@ set(CMAKE_BUILD_TYPE Release)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/modules/")
 set(CMAKE_PREFIX_PATH ${CMAKE_MODULE_PATH})
 
-# find the packages
+# Finding pkg-config
+
+find_package(PkgConfig REQUIRED)
+
+#  hdf5 and netcdf
+
+find_package (HDF5 COMPONENTS C CXX)
+find_package (NETCDF)
+if (DEFINED HDF5_hdf5_LIBRARY_RELEASE)
+  get_filename_component(HDF5_INSTALL_PREFIX ${HDF5_hdf5_LIBRARY_RELEASE} DIRECTORY)
+endif()
+message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")
+message("HDF5_CXX_INCLUDE_DIR: ${HDF5_CXX_INCLUDE_DIR}")
+message("HDF5_C_INCLUDE_DIR: ${HDF5_C_INCLUDE_DIR}")
+
+# find LROSE and Eigen3
 
 find_package(LROSE REQUIRED)
 find_package(Eigen3 REQUIRED)

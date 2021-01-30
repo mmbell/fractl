@@ -15,13 +15,44 @@ makeTdrpParams()
 
 include_directories(${LROSE_PREFIX}/include)
 include_directories(${EIGEN3_INCLUDE_DIR})
-include_directories(/usr/local/include)
+
+if (DEFINED netCDF_INSTALL_PREFIX)
+  include_directories (${netCDF_INSTALL_PREFIX}/include)
+endif()
+if (DEFINED HDF5_CXX_INCLUDE_DIR)
+  include_directories (${HDF5_CXX_INCLUDE_DIR})
+endif()
+if (DEFINED HDF5_C_INCLUDE_DIR)
+  include_directories (${HDF5_C_INCLUDE_DIR})
+endif()
+
+if(IS_DIRECTORY /usr/local/include)
+  include_directories (/usr/local/include)
+endif()
 
 # Link
 
 link_directories(${LROSE_PREFIX}/lib)
-link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)
-link_directories(/usr/local/lib)
+
+if (DEFINED netCDF_INSTALL_PREFIX)
+  link_directories (${netCDF_INSTALL_PREFIX}/lib)
+endif()
+if (DEFINED HDF5_INSTALL_PREFIX)
+  link_directories (${HDF5_INSTALL_PREFIX}/lib)
+endif()
+if (DEFINED HDF5_LIBRARY_DIRS)
+  link_directories(${HDF5_LIBRARY_DIRS})
+endif()
+
+if(IS_DIRECTORY /usr/local/lib)
+  link_directories (/usr/local/lib)
+endif()
+
+# add serial, for odd Debian hdf5 install
+
+if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)
+  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)
+endif()
 
 # location of bin as it is built
 
