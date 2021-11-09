@@ -30,6 +30,13 @@ if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
 
+# print include dirs
+
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
+foreach(dir ${dirs})
+  message(STATUS "include_dir='${dir}'")
+endforeach()
+
 # Link
 
 link_directories(${LROSE_PREFIX}/lib)
@@ -51,6 +58,13 @@ endif()
 if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
+
+# print link dirs
+
+get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY LINK_DIRECTORIES)
+foreach(dir ${dirs})
+  message(STATUS "link_dir='${dir}'")
+endforeach()
 
 # add serial, for odd Debian hdf5 install
 
