@@ -13,9 +13,6 @@ makeTdrpParams()
 
 # includes
 
-include_directories(${LROSE_PREFIX}/include)
-include_directories(${EIGEN3_INCLUDE_DIR})
-
 if (DEFINED netCDF_INSTALL_PREFIX)
   include_directories (${netCDF_INSTALL_PREFIX}/include)
 endif()
@@ -29,6 +26,9 @@ if(IS_DIRECTORY /usr/local/include)
   include_directories (/usr/local/include)
 endif()
 
+include_directories(${EIGEN3_INCLUDE_DIR})
+include_directories(${LROSE_PREFIX}/include)
+
 # print include dirs
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY INCLUDE_DIRECTORIES)
@@ -37,8 +37,6 @@ foreach(dir ${dirs})
 endforeach()
 
 # Link
-
-link_directories(${LROSE_PREFIX}/lib)
 
 if (DEFINED netCDF_INSTALL_PREFIX)
   link_directories (${netCDF_INSTALL_PREFIX}/lib)
@@ -49,19 +47,13 @@ endif()
 if (DEFINED HDF5_LIBRARY_DIRS)
   link_directories(${HDF5_LIBRARY_DIRS})
 endif()
+
 # add serial, for odd Debian hdf5 install
 if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)
   link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)
 endif()
-if(IS_DIRECTORY /usr/local/lib)
-  link_directories (/usr/local/lib)
-endif()
 
-# add serial, for odd Debian hdf5 install
-
-if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)
-  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)
-endif()
+link_directories(${LROSE_PREFIX}/lib)
 
 # print link dirs
 
