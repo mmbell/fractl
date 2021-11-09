@@ -14,7 +14,6 @@ makeTdrpParams()
 # includes
 
 include_directories(${LROSE_PREFIX}/include)
-include_directories(${LROSE_INSTALL_DIR}/include)
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 if (DEFINED netCDF_INSTALL_PREFIX)
@@ -40,7 +39,6 @@ endforeach()
 # Link
 
 link_directories(${LROSE_PREFIX}/lib)
-link_directories(${LROSE_INSTALL_DIR}/lib)
 
 if (DEFINED netCDF_INSTALL_PREFIX)
   link_directories (${netCDF_INSTALL_PREFIX}/lib)
@@ -59,18 +57,18 @@ if(IS_DIRECTORY /usr/local/lib)
   link_directories (/usr/local/lib)
 endif()
 
+# add serial, for odd Debian hdf5 install
+
+if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)
+  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)
+endif()
+
 # print link dirs
 
 get_property(dirs DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY LINK_DIRECTORIES)
 foreach(dir ${dirs})
   message(STATUS "link_dir='${dir}'")
 endforeach()
-
-# add serial, for odd Debian hdf5 install
-
-if(IS_DIRECTORY /usr/lib/x86_64-linux-gnu/hdf5/serial)
-  link_directories(/usr/lib/x86_64-linux-gnu/hdf5/serial)
-endif()
 
 # location of bin as it is built
 
