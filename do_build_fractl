@@ -100,6 +100,6 @@ fi
 
 if [ "$do_install" = "true" ]
 then
-    make install
+    make install/strip
 fi
 
