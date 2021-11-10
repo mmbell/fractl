@@ -13,6 +13,7 @@ function usage() {
     echo "  $scriptName [options below]"
     echo "  -h   :  help"
     echo "  -d   :  turn debugging on"
+    echo "  -v   :  do verbose build"
     echo "  -p ? :  prefix for installing fractl"
     echo "          default is /usr/local/lrose"
     echo "  -l ? :  set lrose install dir"
@@ -24,13 +25,14 @@ function usage() {
 
 scriptName=$(basename $0)
 debug=false
+verbose=false
 prefix=/usr/local/lrose
 lrose_install_dir=/usr/local/lrose
 do_install=false
 use_cmake3=false
 
 # Parse command line options.
-while getopts hdi3p:l: OPT; do
+while getopts hdvi3p:l: OPT; do
     case "$OPT" in
         h)
             usage
@@ -38,6 +40,9 @@ while getopts hdi3p:l: OPT; do
             ;;
         d)
             debug=true
+            ;;
+        v)
+            verbose=true
             ;;
         p)
             prefix=$OPTARG
@@ -64,6 +69,7 @@ echo "===>> Building fractl <<==="
 echo "      prefix: $prefix"
 echo "      lrose_install_dir: $lrose_install_dir"
 echo "      do_install: $do_install"
+echo "      verbose: $verbose"
 
 export LROSE_ROOT_DIR=$prefix
 
@@ -83,7 +89,12 @@ fi
 
 # do the build
 
-make -j 8
+if [ "$verbose" = "true" ]
+then
+    make -j 8 VERBOSE=1
+else
+    make -j 8
+fi
 
 # do the install
 
