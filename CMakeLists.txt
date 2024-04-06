@@ -28,10 +28,13 @@ message("netCDF_INSTALL_PREFIX: ${netCDF_INSTALL_PREFIX}")
 message("HDF5_INSTALL_PREFIX: ${HDF5_INSTALL_PREFIX}")
 message("HDF5_C_INCLUDE_DIR: ${HDF5_C_INCLUDE_DIR}")
 
-# find LROSE and Eigen3
-
+# find LROSE
 find_package(LROSE REQUIRED)
-find_package(Eigen3 REQUIRED)
+
+# code for eigen3 has been copied into the fractly distribution
+# so we no longer need to find the package.
+# find_package(Eigen3 REQUIRED)
+set(EIGEN3_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/eigen3")
 
 # enable testing for this dir and below
 
