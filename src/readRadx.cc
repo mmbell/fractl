@@ -382,7 +382,7 @@ void Fractl::readRadarFile(
       // Calcs that assume a spherical earth with refraction.
       // See notes at the top.
       double krefract = 4.0 / 3.0;
-      double earthRadiusKm = 0.001 * geodesic->MajorRadius();
+      double earthRadiusKm = 0.001 * geodesic->EquatorialRadius();
       double refractRadiusKm = krefract * earthRadiusKm / cos( elevRad);
       double cx = refractRadiusKm * sin( elevRad);
       double cy = earthRadiusKm * (1 - krefract) + aircraftAltKmMsl;
