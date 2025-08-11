@@ -1,6 +1,6 @@
 # cmake for fractl
 
-cmake_minimum_required(VERSION 3.0)
+cmake_minimum_required(VERSION 3.25)
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
 # project name and build type
