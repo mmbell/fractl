@@ -40,13 +40,9 @@ set(EIGEN3_INCLUDE_DIR "${CMAKE_SOURCE_DIR}/eigen3")
 
 enable_testing()
 
-# Set RPATH so that executablefinds lrose libraries without needing LD_LIBRARY_PATH
+# Set RPATH so that executable finds lrose libraries without needing LD_LIBRARY_PATH
 
-set(CMAKE_SKIP_BUILD_RPATH FALSE)
-set(CMAKE_BUILD_WITH_INSTALL_RPATH TRUE)
-
-set(CMAKE_INSTALL_RPATH ${LROSE_PREFIX}/lib)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_INSTALL_RPATH "$ORIGIN/../lib")
 
 # Use RUNPATH, not RPATH
 
