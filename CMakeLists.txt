@@ -3,10 +3,15 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_VERBOSE_MAKEFILE TRUE)
 
-# project name and build type
+# Default to Release build type unless specified on command line
+
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the build type" FORCE)
+endif()
+
+# project name
 
 project(fractl)
-set(CMAKE_BUILD_TYPE Release)
 
 # Where to find *Find*.cmake and *-config.cmake
 
